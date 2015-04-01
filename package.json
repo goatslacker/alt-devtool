@@ -1,0 +1,12 @@
+{
+  "name": "alt-developer-tools-testing",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "build": "browserify app.js -t babelify --outfile build.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
