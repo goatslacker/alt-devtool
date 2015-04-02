@@ -1,46 +1,21 @@
-import React from 'react'
-import Data from './Data.jsx'
-import DevActions from '../actions/DevActions'
+import AltContainer from 'alt/components/AltContainer'
 import DispatcherSearchStore from '../stores/DispatcherSearchStore'
+import DispatcherView from './DispatcherView.jsx'
+import React from 'react'
 
-const App = React.createClass({
-  getInitialState() {
-    return DispatcherSearchStore.getState()
-  },
 
-  componentDidMount() {
-    DispatcherSearchStore.listen(this.onChange)
-  },
-
-  onChange() {
-    this.setState(this.getInitialState())
-  },
-
-  doSearch(ev) {
-    DevActions.search(ev.target.value)
-  },
+class App extends React.Component {
+  constructor() {
+    super()
+  }
 
   render() {
     return (
-      <div>
-        <input type="text" value={this.state.searchValue} onChange={this.doSearch} />
-        <ul>
-          {this.state.dispatches.map((payload, i) => {
-            return (
-              <li key={i}>
-                <strong>{payload.action}</strong>
-                <div>
-                  Data:
-                  <Data data={payload.data} />
-                </div>
-                <div>Stores received update: {payload.stores}</div>
-              </li>
-            )
-          })}
-        </ul>
-      </div>
+      <AltContainer store={DispatcherSearchStore}>
+        <DispatcherView />
+      </AltContainer>
     )
   }
-})
+}
 
 export default App
