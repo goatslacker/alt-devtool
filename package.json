@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "build": "browserify src/components/app.js -t babelify --outfile dist/build.js",
+    "build": "browserify src/index.js -t babelify --outfile dist/build.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Josh Perez <josh@goatslacker.com>",
