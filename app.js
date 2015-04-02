@@ -80,8 +80,7 @@ const DispatcherSearchStore = alt.createStore({
 
     return this.setState({
       dispatches: dispatches.filter((dispatch) => {
-        // XXX remove the special # symbol from dispatch.action before scoring.
-        return stringScore(dispatch.action, searchValue) > 0.5
+        return stringScore(dispatch.action.replace('#', ''), searchValue) > .25
       }),
       searchValue
     })

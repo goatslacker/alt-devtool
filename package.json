@@ -7,6 +7,14 @@
     "build": "browserify app.js -t babelify --outfile build.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC"
+  "author": "Josh Perez <josh@goatslacker.com>",
+  "license": "MIT",
+  "dependencies": {
+    "alt": "^0.15.0",
+    "react": "^0.13.1"
+  },
+  "devDependencies": {
+    "babel": "^4.7.16",
+    "babelify": "^5.0.4",
+  }
 }

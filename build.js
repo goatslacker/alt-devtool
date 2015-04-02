@@ -81,8 +81,6 @@ var DispatcherSearchStore = alt.createStore({
 
     var dispatches = _DispatcherStore$getState.dispatches;
 
-    console.log("@", searchValue);
-
     if (!searchValue.trim()) {
       return this.setState({
         dispatches: dispatches,
@@ -92,8 +90,7 @@ var DispatcherSearchStore = alt.createStore({
 
     return this.setState({
       dispatches: dispatches.filter(function (dispatch) {
-        console.log("@", dispatch);
-        return stringScore(dispatch.action, searchValue) > 0.5;
+        return stringScore(dispatch.action.replace("#", ""), searchValue) > 0.25;
       }),
       searchValue: searchValue
     });

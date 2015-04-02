@@ -102,4 +102,4 @@ function score(string, word, fuzziness) {
   return finalScore;
 };
 
-module.exports = score
+module.exports = score;
