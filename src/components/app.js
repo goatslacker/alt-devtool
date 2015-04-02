@@ -1,8 +1,8 @@
 import React from 'react'
 import Alt from 'alt'
-import stringScore from './stringScore'
+import stringScore from '../utils/stringScore'
 
-import Data from './data'
+import Data from './Data.jsx'
 
 const alt = new Alt()
 
