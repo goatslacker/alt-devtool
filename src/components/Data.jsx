@@ -1,11 +1,15 @@
-var React = require('react')
+import React from 'react'
 
-const Leaf = React.createClass({
-  displayName: 'Leaf',
+class Leaf extends React.Component {
+  constructor() {
+    super()
 
-  getInitialState() {
-    return { hidden: true }
-  },
+    this.state = {
+      hidden: true
+    }
+
+    this.toggle = this._toggle.bind(this)
+  }
 
   renderValue() {
     if (typeof this.props.data === 'object') {
@@ -22,13 +26,13 @@ const Leaf = React.createClass({
 
       return <span className={className}>{String(this.props.data)}</span>
     }
-  },
+  }
 
   renderPluralCount(n) {
     return n === 0
       ? ''
       : n === 1 ? '1 item' : `${n} items`
-  },
+  }
 
   renderLabel() {
     const label = this.props.label || 'root'
@@ -55,13 +59,13 @@ const Leaf = React.createClass({
         </span>
       </span>
     )
-  },
+  }
 
-  toggle() {
+  _toggle() {
     this.setState({
       hidden: !this.state.hidden
     })
-  },
+  }
 
   render() {
     return (
@@ -73,10 +77,12 @@ const Leaf = React.createClass({
       </div>
     )
   }
-})
+}
 
-const Data = React.createClass({
-  displayName: 'Leaf',
+class Data extends React.Component {
+  constructor() {
+    super()
+  }
 
   render() {
     return (
@@ -85,6 +91,6 @@ const Data = React.createClass({
       </div>
     )
   }
-})
+}
 
-module.exports = Data
+export default Data

@@ -21023,101 +21023,141 @@ module.exports = require('./lib/React');
 },{"./lib/React":35}],163:[function(require,module,exports){
 "use strict";
 
-var React = require("react");
+var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 
-var Leaf = React.createClass({
-  displayName: "Leaf",
+var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-  getInitialState: function getInitialState() {
-    return { hidden: true };
-  },
+var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-  renderValue: function renderValue() {
-    var _this = this;
+var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
 
-    if (typeof this.props.data === "object") {
-      if (this.state.hidden) {
-        return null;
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+var React = _interopRequire(require("react"));
+
+var Leaf = (function (_React$Component) {
+  function Leaf() {
+    _classCallCheck(this, Leaf);
+
+    _get(Object.getPrototypeOf(Leaf.prototype), "constructor", this).call(this);
+
+    this.state = {
+      hidden: true
+    };
+
+    this.toggle = this._toggle.bind(this);
+  }
+
+  _inherits(Leaf, _React$Component);
+
+  _createClass(Leaf, {
+    renderValue: {
+      value: function renderValue() {
+        var _this = this;
+
+        if (typeof this.props.data === "object") {
+          if (this.state.hidden) {
+            return null;
+          }
+
+          return Object.keys(this.props.data).map(function (node, i) {
+            return React.createElement(Leaf, { key: i, label: node, data: _this.props.data[node] });
+          });
+        } else {
+          var jstype = typeof this.props.data;
+          var className = "json-inspector__value json-inspector__value_" + jstype;
+
+          return React.createElement(
+            "span",
+            { className: className },
+            String(this.props.data)
+          );
+        }
       }
+    },
+    renderPluralCount: {
+      value: function renderPluralCount(n) {
+        return n === 0 ? "" : n === 1 ? "1 item" : "" + n + " items";
+      }
+    },
+    renderLabel: {
+      value: function renderLabel() {
+        var label = this.props.label || "root";
 
-      return Object.keys(this.props.data).map(function (node, i) {
-        return React.createElement(Leaf, { key: i, label: node, data: _this.props.data[node] });
-      });
-    } else {
-      var jstype = typeof this.props.data;
-      var className = "json-inspector__value json-inspector__value_" + jstype;
+        var jstype = typeof this.props.data;
 
-      return React.createElement(
-        "span",
-        { className: className },
-        String(this.props.data)
-      );
+        var type = jstype !== "object" ? "" : Array.isArray(this.props.data) ? "[]" : "{}";
+
+        var length = jstype === "object" && this.props.data != null ? Object.keys(this.props.data).length : 0;
+
+        return React.createElement(
+          "span",
+          null,
+          React.createElement(
+            "span",
+            { className: "json-inspector__key" },
+            label,
+            ":"
+          ),
+          React.createElement(
+            "span",
+            { className: "json-inspector__value json-inspector__value_helper" },
+            type,
+            " ",
+            this.renderPluralCount(length)
+          )
+        );
+      }
+    },
+    _toggle: {
+      value: function _toggle() {
+        this.setState({
+          hidden: !this.state.hidden
+        });
+      }
+    },
+    render: {
+      value: function render() {
+        return React.createElement(
+          "div",
+          { className: "json-inspector__leaf json-inspector__line" },
+          React.createElement(
+            "span",
+            { onClick: this.toggle },
+            this.renderLabel()
+          ),
+          this.renderValue()
+        );
+      }
     }
-  },
+  });
 
-  renderPluralCount: function renderPluralCount(n) {
-    return n === 0 ? "" : n === 1 ? "1 item" : "" + n + " items";
-  },
+  return Leaf;
+})(React.Component);
 
-  renderLabel: function renderLabel() {
-    var label = this.props.label || "root";
+var Data = (function (_React$Component2) {
+  function Data() {
+    _classCallCheck(this, Data);
 
-    var jstype = typeof this.props.data;
-
-    var type = jstype !== "object" ? "" : Array.isArray(this.props.data) ? "[]" : "{}";
-
-    var length = jstype === "object" && this.props.data != null ? Object.keys(this.props.data).length : 0;
-
-    return React.createElement(
-      "span",
-      null,
-      React.createElement(
-        "span",
-        { className: "json-inspector__key" },
-        label,
-        ":"
-      ),
-      React.createElement(
-        "span",
-        { className: "json-inspector__value json-inspector__value_helper" },
-        type,
-        " ",
-        this.renderPluralCount(length)
-      )
-    );
-  },
-
-  toggle: function toggle() {
-    this.setState({
-      hidden: !this.state.hidden
-    });
-  },
-
-  render: function render() {
-    return React.createElement(
-      "div",
-      { className: "json-inspector__leaf json-inspector__line" },
-      React.createElement(
-        "span",
-        { onClick: this.toggle },
-        this.renderLabel()
-      ),
-      this.renderValue()
-    );
+    _get(Object.getPrototypeOf(Data.prototype), "constructor", this).call(this);
   }
-});
 
-var Data = React.createClass({
-  displayName: "Leaf",
+  _inherits(Data, _React$Component2);
 
-  render: function render() {
-    return React.createElement(
-      "div",
-      { className: "json-inspector" },
-      React.createElement(Leaf, { data: this.props.data })
-    );
-  }
-});
+  _createClass(Data, {
+    render: {
+      value: function render() {
+        return React.createElement(
+          "div",
+          { className: "json-inspector" },
+          React.createElement(Leaf, { data: this.props.data })
+        );
+      }
+    }
+  });
+
+  return Data;
+})(React.Component);
 
 module.exports = Data;
 
