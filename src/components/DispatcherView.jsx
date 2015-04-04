@@ -17,7 +17,17 @@ class DispatcherView extends React.Component {
     return (
       <div>
         <input type="text" value={this.props.searchValue} onChange={this.doSearch} />
-        <i>O</i>
+        <i className="fa fa-ban"></i> Clear
+
+        <i className="fa fa-dot-circle-o"></i> Record
+        <i className="fa fa-pause"></i> Pause
+        <i className="fa fa-play-circle"></i> Play
+
+        <i className="fa fa-recycle"></i> Recycle
+        <i className="fa fa-refresh"></i> Refresh
+        <i className="fa fa-filter"></i> Filter
+        <i className="fa fa-history"></i> History
+        <i className="fa fa-undo"></i> Undo
 
         <ul>
           {this.props.dispatches.map((payload, i) => {

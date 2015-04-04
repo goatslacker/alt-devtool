@@ -24,6 +24,11 @@ class App extends React.Component {
             <StoresView />
           </AltContainer>
         </Tabs.Panel>
+        <Tabs.Panel title="Settings">
+          <div>
+            Take Snapshot
+          </div>
+        </Tabs.Panel>
       </Tabs>
     )
   }

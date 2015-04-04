@@ -23646,6 +23646,15 @@ var App = (function (_React$Component) {
               { store: StoresStore },
               React.createElement(StoresView, null)
             )
+          ),
+          React.createElement(
+            Tabs.Panel,
+            { title: "Settings" },
+            React.createElement(
+              "div",
+              null,
+              "Take Snapshot"
+            )
           )
         );
       }
@@ -23840,11 +23849,24 @@ var DispatcherView = (function (_React$Component) {
           "div",
           null,
           React.createElement("input", { type: "text", value: this.props.searchValue, onChange: this.doSearch }),
-          React.createElement(
-            "i",
-            null,
-            "O"
-          ),
+          React.createElement("i", { className: "fa fa-ban" }),
+          " Clear",
+          React.createElement("i", { className: "fa fa-dot-circle-o" }),
+          " Record",
+          React.createElement("i", { className: "fa fa-pause" }),
+          " Pause",
+          React.createElement("i", { className: "fa fa-play-circle" }),
+          " Play",
+          React.createElement("i", { className: "fa fa-recycle" }),
+          " Recycle",
+          React.createElement("i", { className: "fa fa-refresh" }),
+          " Refresh",
+          React.createElement("i", { className: "fa fa-filter" }),
+          " Filter",
+          React.createElement("i", { className: "fa fa-history" }),
+          " History",
+          React.createElement("i", { className: "fa fa-undo" }),
+          " Undo",
           React.createElement(
             "ul",
             null,
