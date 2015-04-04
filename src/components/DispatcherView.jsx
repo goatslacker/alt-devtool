@@ -17,6 +17,8 @@ class DispatcherView extends React.Component {
     return (
       <div>
         <input type="text" value={this.props.searchValue} onChange={this.doSearch} />
+        <i>O</i>
+
         <ul>
           {this.props.dispatches.map((payload, i) => {
             return (

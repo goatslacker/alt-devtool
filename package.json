@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "build": "browserify src/index.js -t babelify --outfile dist/build.js",
+    "watch": "watchify src/index.js -t babelify --outfile dist/build.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Josh Perez <josh@goatslacker.com>",
@@ -15,6 +16,7 @@
   },
   "devDependencies": {
     "babel": "^4.7.16",
-    "babelify": "^5.0.4"
+    "babelify": "^5.0.4",
+    "watchify": "^3.1.0"
   }
 }
