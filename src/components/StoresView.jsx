@@ -1,13 +1,8 @@
+import Data from './Data.jsx'
 import React from 'react'
 
 class StoresView extends React.Component {
-  constructor() {
-    super()
-  }
-
   render() {
-    console.log(this.props)
-
     return (
       <div>
         <ul>
@@ -15,6 +10,9 @@ class StoresView extends React.Component {
             return (
               <li key={i}>
                 <strong>{store.name}</strong>
+                {' '}
+                (<span>{store.dispatchId}</span>)
+                <Data data={JSON.parse(store.state)} />
               </li>
             )
           })}

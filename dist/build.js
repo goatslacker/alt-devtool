@@ -54,16 +54,30 @@ var AltContainer = React.createClass({
       throw new ReferenceError('Cannot define both store and stores')
     }
 
-    return this.getStateFromStores() || {}
+    return this.getStateFromStores(this.props) || {}
+  },
+
+  componentWillReceiveProps: function (nextProps) {
+    this.destroySubscriptions()
+    this.setState(this.getStateFromStores(nextProps))
+    this.registerStores(nextProps)
   },
 
   componentDidMount: function () {
+    this.registerStores(this.props)
+  },
+
+  componentWillUnmount: function () {
+    this.destroySubscriptions()
+  },
+
+  registerStores: function (props) {
     Subscribe.create(this)
 
-    if (this.props.store) {
-      this.addSubscription(this.props.store)
-    } else if (this.props.stores) {
-      var stores = this.props.stores
+    if (props.store) {
+      this.addSubscription(props.store)
+    } else if (props.stores) {
+      var stores = props.stores
 
       if (Array.isArray(stores)) {
         stores.forEach(function (store) {
@@ -77,26 +91,26 @@ var AltContainer = React.createClass({
     }
   },
 
-  componentWillUnmount: function () {
+  destroySubscriptions: function () {
     Subscribe.destroy(this)
   },
 
-  getStateFromStores: function () {
-    if (this.props.store) {
-      return getState(this.props.store, this.props)
-    } else if (this.props.stores) {
-      var stores = this.props.stores
+  getStateFromStores: function (props) {
+    if (props.store) {
+      return getState(props.store, props)
+    } else if (props.stores) {
+      var stores = props.stores
 
       // If you pass in an array of stores the state is merged together.
       if (Array.isArray(stores)) {
         return stores.reduce(function (obj, store) {
-          return assign(obj, getState(store, this.props))
+          return assign(obj, getState(store, props))
         }.bind(this), {})
 
       // if it is an object then the state is added to the key specified
       } else {
         return Object.keys(stores).reduce(function (obj, key) {
-          obj[key] = getState(stores[key], this.props)
+          obj[key] = getState(stores[key], props)
           return obj
         }.bind(this), {})
       }
@@ -105,14 +119,14 @@ var AltContainer = React.createClass({
     }
   },
 
-  addSubscription: function(store) {
+  addSubscription: function (store) {
     if (typeof store === 'object') {
       Subscribe.add(this, store, this.altSetState)
     }
   },
 
   altSetState: function () {
-    this.setState(this.getStateFromStores())
+    this.setState(this.getStateFromStores(this.props))
   },
 
   getProps: function () {
@@ -23875,11 +23889,11 @@ var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["defau
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
 var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+var Data = _interopRequire(require("./Data.jsx"));
 
 var React = _interopRequire(require("react"));
 
@@ -23887,7 +23901,9 @@ var StoresView = (function (_React$Component) {
   function StoresView() {
     _classCallCheck(this, StoresView);
 
-    _get(Object.getPrototypeOf(StoresView.prototype), "constructor", this).call(this);
+    if (_React$Component != null) {
+      _React$Component.apply(this, arguments);
+    }
   }
 
   _inherits(StoresView, _React$Component);
@@ -23895,8 +23911,6 @@ var StoresView = (function (_React$Component) {
   _createClass(StoresView, {
     render: {
       value: function render() {
-        console.log(this.props);
-
         return React.createElement(
           "div",
           null,
@@ -23911,7 +23925,15 @@ var StoresView = (function (_React$Component) {
                   "strong",
                   null,
                   store.name
-                )
+                ),
+                " (",
+                React.createElement(
+                  "span",
+                  null,
+                  store.dispatchId
+                ),
+                ")",
+                React.createElement(Data, { data: JSON.parse(store.state) })
               );
             })
           )
@@ -23925,7 +23947,7 @@ var StoresView = (function (_React$Component) {
 
 module.exports = StoresView;
 
-},{"react":183}],190:[function(require,module,exports){
+},{"./Data.jsx":187,"react":183}],190:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -23970,11 +23992,17 @@ var XAltStore = XAlt.createStore({
 
 window.XAltActions = XAltActions;
 
+// XXX use finalStore actually
 XAlt.dispatcher.register(function (payload) {
   DevActions.addDispatch({
     action: Symbol.keyFor(payload.action),
     data: payload.data
   });
+
+  // hack to make sure all stores get the update
+  setTimeout(function () {
+    DevActions.addStores(parseStores(XAlt));
+  }, 0);
 });
 
 function parseStores(alt) {

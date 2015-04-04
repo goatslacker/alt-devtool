@@ -29,11 +29,18 @@ const XAltStore = XAlt.createStore({
 
 window.XAltActions = XAltActions
 
+// XXX use finalStore actually
 XAlt.dispatcher.register(function (payload) {
   DevActions.addDispatch({
     action: Symbol.keyFor(payload.action),
     data: payload.data
   })
+
+
+  // hack to make sure all stores get the update
+  setTimeout(function () {
+    DevActions.addStores(parseStores(XAlt))
+  }, 0)
 })
 
 function parseStores(alt) {
