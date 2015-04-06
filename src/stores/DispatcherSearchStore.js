@@ -38,7 +38,7 @@ const DispatcherSearchStore = alt.createStore({
 
     return this.setState({
       dispatches: dispatches.filter((dispatch) => {
-        return stringScore(dispatch.action.replace('#', ''), searchValue) > .25
+        return stringScore(dispatch[0].replace('#', ''), searchValue) > .25
       }),
       searchValue
     })

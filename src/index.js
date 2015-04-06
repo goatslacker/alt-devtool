@@ -1,3 +1,6 @@
+import assign from 'object-assign'
+Object.assign = Object.assign || assign
+
 import Alt from 'alt'
 import App from './components/App.jsx'
 import DevActions from './actions/DevActions'

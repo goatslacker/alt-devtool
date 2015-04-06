@@ -15,12 +15,17 @@ const DispatcherStore = alt.createStore({
 
   addItem(dispatch) {
     const { stores } = StoresStore.getState()
-    dispatch.stores = stores
+
+    const dispatchedStores = stores
       .filter((x) => x.listeners.indexOf(dispatch.action) > -1)
       .map((x) => x.name)
       .join(', ')
 
-    this.state.dispatches.push(dispatch)
+    this.state.dispatches.push([
+      dispatch.action,
+      dispatch.data,
+      dispatchedStores
+    ])
   }
 })
 
