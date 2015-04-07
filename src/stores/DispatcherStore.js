@@ -6,11 +6,16 @@ const DispatcherStore = alt.createStore({
   displayName: 'DispatcherStore',
 
   bindListeners: {
-    addItem: DevActions.addDispatch
+    addItem: DevActions.addDispatch,
+    clearAll: DevActions.clearDispatches
   },
 
   state: {
     dispatches: [],
+  },
+
+  clearAll() {
+    this.state.dispatches = []
   },
 
   addItem(dispatch) {

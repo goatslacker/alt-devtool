@@ -58,3 +58,12 @@ function parseStores(alt) {
   })
 }
 DevActions.addStores(parseStores(XAlt))
+
+// test actions
+XAltActions.foo({ num: Math.random() })
+XAltActions.bar({ num: Math.random() })
+XAltActions.bar({ num: Math.random() })
+XAltActions.baz({ num: Math.random(), obj: { foo: 1, bar: 2, baz: [1,2,3], spazz: { a: 'a', b: 'b' }} })
+XAltActions.bar({ num: Math.random() })
+XAltActions.foo({ num: Math.random() })
+XAltActions.baz({ num: Math.random() })

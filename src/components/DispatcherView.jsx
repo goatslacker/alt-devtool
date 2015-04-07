@@ -8,6 +8,7 @@ class DispatcherView extends React.Component {
     super()
 
     this.doSearch = this._doSearch.bind(this)
+    this.clearDispatches = this._clearDispatches.bind(this)
 
     this.state = {
       height: 300,
@@ -20,6 +21,10 @@ class DispatcherView extends React.Component {
       height: window.innerHeight / 2,
       width: window.innerWidth - 40
     })
+  }
+
+  _clearDispatches() {
+    DevActions.clearDispatches()
   }
 
   _doSearch(ev) {
@@ -39,14 +44,16 @@ class DispatcherView extends React.Component {
 
     return (
       <div>
-        <i className="fa fa-ban"></i> Clear
+        <span onClick={this.clearDispatches}>
+          <i className="fa fa-ban"></i> Clear Dispatches
+        </span>
         <input type="text" value={this.props.searchValue} onChange={this.doSearch} />
         <Table
           rowHeight={50}
           rowGetter={(idx) => this.props.dispatches[idx]}
           rowsCount={this.props.dispatches.length}
           width={this.state.width}
-          height={this.state.height}
+          height={this.props.dispatches.length * 50 + 50}
           headerHeight={50}>
           <Column
             dataKey={0}

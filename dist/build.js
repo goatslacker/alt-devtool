@@ -29756,7 +29756,7 @@ var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["defau
 
 var alt = _interopRequire(require("../flux/alt"));
 
-var DevActions = alt.generateActions("addDispatch", "addStores", "search");
+var DevActions = alt.generateActions("addDispatch", "addStores", "clearDispatches", "search");
 
 module.exports = DevActions;
 
@@ -30011,6 +30011,7 @@ var DispatcherView = (function (_React$Component) {
     _get(Object.getPrototypeOf(DispatcherView.prototype), "constructor", this).call(this);
 
     this.doSearch = this._doSearch.bind(this);
+    this.clearDispatches = this._clearDispatches.bind(this);
 
     this.state = {
       height: 300,
@@ -30027,6 +30028,11 @@ var DispatcherView = (function (_React$Component) {
           height: window.innerHeight / 2,
           width: window.innerWidth - 40
         });
+      }
+    },
+    _clearDispatches: {
+      value: function _clearDispatches() {
+        DevActions.clearDispatches();
       }
     },
     _doSearch: {
@@ -30051,8 +30057,12 @@ var DispatcherView = (function (_React$Component) {
         return React.createElement(
           "div",
           null,
-          React.createElement("i", { className: "fa fa-ban" }),
-          " Clear",
+          React.createElement(
+            "span",
+            { onClick: this.clearDispatches },
+            React.createElement("i", { className: "fa fa-ban" }),
+            " Clear Dispatches"
+          ),
           React.createElement("input", { type: "text", value: this.props.searchValue, onChange: this.doSearch }),
           React.createElement(
             Table,
@@ -30063,7 +30073,7 @@ var DispatcherView = (function (_React$Component) {
               },
               rowsCount: this.props.dispatches.length,
               width: this.state.width,
-              height: this.state.height,
+              height: this.props.dispatches.length * 50 + 50,
               headerHeight: 50 },
             React.createElement(Column, {
               dataKey: 0,
@@ -30235,6 +30245,15 @@ function parseStores(alt) {
 }
 DevActions.addStores(parseStores(XAlt));
 
+// test actions
+XAltActions.foo({ num: Math.random() });
+XAltActions.bar({ num: Math.random() });
+XAltActions.bar({ num: Math.random() });
+XAltActions.baz({ num: Math.random(), obj: { foo: 1, bar: 2, baz: [1, 2, 3], spazz: { a: "a", b: "b" } } });
+XAltActions.bar({ num: Math.random() });
+XAltActions.foo({ num: Math.random() });
+XAltActions.baz({ num: Math.random() });
+
 },{"./actions/DevActions":237,"./components/App.jsx":238,"alt":2,"object-assign":61,"react":235}],244:[function(require,module,exports){
 "use strict";
 
@@ -30253,12 +30272,17 @@ var DispatcherSearchStore = alt.createStore({
 
   bindListeners: {
     addItem: DevActions.addDispatch,
+    clearAll: DevActions.clearDispatches,
     search: DevActions.search
   },
 
   state: {
     dispatches: [],
     searchValue: ""
+  },
+
+  beforeEach: function beforeEach() {
+    this.waitFor(DispatcherStore);
   },
 
   addItem: function addItem() {
@@ -30269,9 +30293,12 @@ var DispatcherSearchStore = alt.createStore({
     return this.updateSearch(searchValue);
   },
 
-  updateSearch: function updateSearch(searchValue) {
-    this.waitFor(DispatcherStore);
+  clearAll: function clearAll() {
+    this.state.dispatches = [];
+    this.state.searchValue = "";
+  },
 
+  updateSearch: function updateSearch(searchValue) {
     var _DispatcherStore$getState = DispatcherStore.getState();
 
     var dispatches = _DispatcherStore$getState.dispatches;
@@ -30309,11 +30336,16 @@ var DispatcherStore = alt.createStore({
   displayName: "DispatcherStore",
 
   bindListeners: {
-    addItem: DevActions.addDispatch
+    addItem: DevActions.addDispatch,
+    clearAll: DevActions.clearDispatches
   },
 
   state: {
     dispatches: [] },
+
+  clearAll: function clearAll() {
+    this.state.dispatches = [];
+  },
 
   addItem: function addItem(dispatch) {
     var _StoresStore$getState = StoresStore.getState();

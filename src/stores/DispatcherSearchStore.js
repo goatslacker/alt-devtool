@@ -8,12 +8,17 @@ const DispatcherSearchStore = alt.createStore({
 
   bindListeners: {
     addItem: DevActions.addDispatch,
+    clearAll: DevActions.clearDispatches,
     search: DevActions.search
   },
 
   state: {
     dispatches: [],
     searchValue: ''
+  },
+
+  beforeEach() {
+    this.waitFor(DispatcherStore)
   },
 
   addItem() {
@@ -24,9 +29,12 @@ const DispatcherSearchStore = alt.createStore({
     return this.updateSearch(searchValue)
   },
 
-  updateSearch(searchValue) {
-    this.waitFor(DispatcherStore)
+  clearAll() {
+    this.state.dispatches = []
+    this.state.searchValue = ''
+  },
 
+  updateSearch(searchValue) {
     const { dispatches } = DispatcherStore.getState()
 
     if (!searchValue.trim()) {
