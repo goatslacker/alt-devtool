@@ -28,8 +28,8 @@ const DispatcherStore = alt.createStore({
 
     this.state.dispatches.push([
       dispatch.action,
-      dispatch.data,
-      dispatchedStores
+      dispatchedStores,
+      dispatch.data
     ])
   }
 })

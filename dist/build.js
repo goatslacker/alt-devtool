@@ -29822,7 +29822,7 @@ var App = (function (_React$Component) {
           ),
           React.createElement(
             Tabs.Panel,
-            { title: "Settings" },
+            { title: "Tools" },
             React.createElement(
               "div",
               null,
@@ -30012,6 +30012,7 @@ var DispatcherView = (function (_React$Component) {
 
     this.doSearch = this._doSearch.bind(this);
     this.clearDispatches = this._clearDispatches.bind(this);
+    this.selectRow = this._selectRow.bind(this);
 
     this.state = {
       height: 300,
@@ -30025,9 +30026,15 @@ var DispatcherView = (function (_React$Component) {
     componentDidMount: {
       value: function componentDidMount() {
         this.setState({
-          height: window.innerHeight / 2,
-          width: window.innerWidth - 40
+          height: window.innerHeight - 150,
+          payloadId: null,
+          width: window.innerWidth / 2 - 40
         });
+      }
+    },
+    getPayload: {
+      value: function getPayload() {
+        return this.props.dispatches[this.state.payloadId] ? this.props.dispatches[this.state.payloadId][2] : {};
       }
     },
     _clearDispatches: {
@@ -30038,6 +30045,11 @@ var DispatcherView = (function (_React$Component) {
     _doSearch: {
       value: function _doSearch(ev) {
         DevActions.search(ev.target.value);
+      }
+    },
+    _selectRow: {
+      value: function _selectRow(ev, id, rowData) {
+        this.setState({ payloadId: id });
       }
     },
     render: {
@@ -30054,46 +30066,78 @@ var DispatcherView = (function (_React$Component) {
         //    <i className="fa fa-history"></i> History
         //    <i className="fa fa-undo"></i> Undo
 
+        // XXX table needs a max height of the document - a few px
+        // table needs to resize, take up full remaining height of document
+        // when selecting a row, highlight it.
+        // I need a "payload" header
         return React.createElement(
           "div",
           null,
           React.createElement(
-            "span",
-            { onClick: this.clearDispatches },
+            "button",
+            { className: "btn btn-sm", onClick: this.clearDispatches },
             React.createElement("i", { className: "fa fa-ban" }),
             " Clear Dispatches"
           ),
+          " ",
           React.createElement("input", { type: "text", value: this.props.searchValue, onChange: this.doSearch }),
           React.createElement(
-            Table,
-            {
-              rowHeight: 50,
-              rowGetter: function (idx) {
-                return _this.props.dispatches[idx];
-              },
-              rowsCount: this.props.dispatches.length,
-              width: this.state.width,
-              height: this.props.dispatches.length * 50 + 50,
-              headerHeight: 50 },
-            React.createElement(Column, {
-              dataKey: 0,
-              label: "Name",
-              width: this.state.width / 6
-            }),
-            React.createElement(Column, {
-              cellRenderer: function (obj) {
-                return React.createElement(Data, { data: obj });
-              },
-              dataKey: 1,
-              flexGrow: 1,
-              label: "Payload",
-              width: this.state.width / 2
-            }),
-            React.createElement(Column, {
-              dataKey: 2,
-              label: "Stores",
-              width: this.state.width / 3
-            })
+            "div",
+            { className: "row" },
+            React.createElement(
+              "div",
+              { className: "col c6" },
+              React.createElement(
+                Table,
+                {
+                  headerHeight: 40,
+                  height: this.state.height,
+                  onRowClick: this.selectRow,
+                  rowGetter: function (idx) {
+                    return _this.props.dispatches[idx];
+                  },
+                  rowHeight: 40,
+                  rowsCount: this.props.dispatches.length,
+                  width: this.state.width
+                },
+                React.createElement(Column, {
+                  dataKey: 0,
+                  label: "Name",
+                  width: this.state.width / 2
+                }),
+                React.createElement(Column, {
+                  dataKey: 1,
+                  label: "Stores",
+                  width: this.state.width / 2
+                })
+              )
+            ),
+            React.createElement(
+              "div",
+              { className: "col c6" },
+              React.createElement(
+                "div",
+                { className: "public_fixedDataTable_main" },
+                React.createElement(
+                  "div",
+                  { className: "public_fixedDataTable_header" },
+                  React.createElement(
+                    "div",
+                    { className: "public_fixedDataTableCell_main" },
+                    React.createElement(
+                      "div",
+                      { className: "public_fixedDataTableCell_cellContent" },
+                      "Payload"
+                    )
+                  )
+                ),
+                React.createElement(
+                  "div",
+                  { className: "public_fixedDataTableCell_main" },
+                  React.createElement(Data, { data: this.getPayload() })
+                )
+              )
+            )
           )
         );
       }
@@ -30358,7 +30402,7 @@ var DispatcherStore = alt.createStore({
       return x.name;
     }).join(", ");
 
-    this.state.dispatches.push([dispatch.action, dispatch.data, dispatchedStores]);
+    this.state.dispatches.push([dispatch.action, dispatchedStores, dispatch.data]);
   }
 });
 
