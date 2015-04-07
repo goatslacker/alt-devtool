@@ -30011,11 +30011,24 @@ var DispatcherView = (function (_React$Component) {
     _get(Object.getPrototypeOf(DispatcherView.prototype), "constructor", this).call(this);
 
     this.doSearch = this._doSearch.bind(this);
+
+    this.state = {
+      height: 300,
+      width: 600
+    };
   }
 
   _inherits(DispatcherView, _React$Component);
 
   _createClass(DispatcherView, {
+    componentDidMount: {
+      value: function componentDidMount() {
+        this.setState({
+          height: window.innerHeight / 2,
+          width: window.innerWidth - 40
+        });
+      }
+    },
     _doSearch: {
       value: function _doSearch(ev) {
         DevActions.search(ev.target.value);
@@ -30049,14 +30062,13 @@ var DispatcherView = (function (_React$Component) {
                 return _this.props.dispatches[idx];
               },
               rowsCount: this.props.dispatches.length,
-              width: 400,
-              height: 1000,
+              width: this.state.width,
+              height: this.state.height,
               headerHeight: 50 },
             React.createElement(Column, {
               dataKey: 0,
-              flexGrow: 1,
               label: "Name",
-              width: 100
+              width: this.state.width / 6
             }),
             React.createElement(Column, {
               cellRenderer: function (obj) {
@@ -30065,13 +30077,12 @@ var DispatcherView = (function (_React$Component) {
               dataKey: 1,
               flexGrow: 1,
               label: "Payload",
-              width: 200
+              width: this.state.width / 2
             }),
             React.createElement(Column, {
               dataKey: 2,
-              flexGrow: 1,
               label: "Stores",
-              width: 100
+              width: this.state.width / 3
             })
           )
         );

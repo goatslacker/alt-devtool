@@ -8,6 +8,18 @@ class DispatcherView extends React.Component {
     super()
 
     this.doSearch = this._doSearch.bind(this)
+
+    this.state = {
+      height: 300,
+      width: 600
+    }
+  }
+
+  componentDidMount() {
+    this.setState({
+      height: window.innerHeight / 2,
+      width: window.innerWidth - 40
+    })
   }
 
   _doSearch(ev) {
@@ -33,14 +45,13 @@ class DispatcherView extends React.Component {
           rowHeight={50}
           rowGetter={(idx) => this.props.dispatches[idx]}
           rowsCount={this.props.dispatches.length}
-          width={400}
-          height={1000}
+          width={this.state.width}
+          height={this.state.height}
           headerHeight={50}>
           <Column
             dataKey={0}
-            flexGrow={1}
             label="Name"
-            width={100}
+            width={this.state.width / 6}
           />
           <Column
             cellRenderer={(obj) => {
@@ -49,13 +60,12 @@ class DispatcherView extends React.Component {
             dataKey={1}
             flexGrow={1}
             label="Payload"
-            width={200}
+            width={this.state.width / 2}
           />
           <Column
             dataKey={2}
-            flexGrow={1}
             label="Stores"
-            width={100}
+            width={this.state.width / 3}
           />
         </Table>
       </div>
