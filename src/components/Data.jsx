@@ -1,11 +1,11 @@
 import React from 'react'
 
 class Leaf extends React.Component {
-  constructor() {
-    super()
+  constructor(props) {
+    super(props)
 
     this.state = {
-      hidden: true
+      hidden: this.props.hidden
     }
 
     this.toggle = this._toggle.bind(this)
@@ -79,6 +79,8 @@ class Leaf extends React.Component {
   }
 }
 
+Leaf.defaultProps = { hidden: true }
+
 class Data extends React.Component {
   constructor() {
     super()
@@ -87,7 +89,7 @@ class Data extends React.Component {
   render() {
     return (
       <div className="json-inspector">
-        <Leaf data={this.props.data} />
+        <Leaf data={this.props.data} hidden={false} />
       </div>
     )
   }

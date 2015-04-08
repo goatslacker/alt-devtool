@@ -29917,13 +29917,13 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
 var React = _interopRequire(require("react"));
 
 var Leaf = (function (_React$Component) {
-  function Leaf() {
+  function Leaf(props) {
     _classCallCheck(this, Leaf);
 
-    _get(Object.getPrototypeOf(Leaf.prototype), "constructor", this).call(this);
+    _get(Object.getPrototypeOf(Leaf.prototype), "constructor", this).call(this, props);
 
     this.state = {
-      hidden: true
+      hidden: this.props.hidden
     };
 
     this.toggle = this._toggle.bind(this);
@@ -30016,6 +30016,8 @@ var Leaf = (function (_React$Component) {
   return Leaf;
 })(React.Component);
 
+Leaf.defaultProps = { hidden: true };
+
 var Data = (function (_React$Component2) {
   function Data() {
     _classCallCheck(this, Data);
@@ -30031,7 +30033,7 @@ var Data = (function (_React$Component2) {
         return React.createElement(
           "div",
           { className: "json-inspector" },
-          React.createElement(Leaf, { data: this.props.data })
+          React.createElement(Leaf, { data: this.props.data, hidden: false })
         );
       }
     }
