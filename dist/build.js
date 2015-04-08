@@ -29797,8 +29797,28 @@ var App = (function (_React$Component) {
   _inherits(App, _React$Component);
 
   _createClass(App, {
+    postMessage: {
+      value: function postMessage(action, data) {
+        this.props.connection.postMessage({
+          name: "alt-interface",
+          payload: { action: action, data: data }
+        });
+      }
+    },
+    takeSnapshot: {
+      value: function takeSnapshot() {
+        this.postMessage("SNAPSHOT");
+      }
+    },
+    flush: {
+      value: function flush() {
+        this.postMessage("FLUSH");
+      }
+    },
     render: {
       value: function render() {
+        var _this = this;
+
         //    <i className="fa fa-dot-circle-o"></i> Record
         //    <i className="fa fa-pause"></i> Pause
         //    <i className="fa fa-play-circle"></i> Play
@@ -29840,7 +29860,12 @@ var App = (function (_React$Component) {
                 null,
                 React.createElement(
                   "button",
-                  { className: "btn btn-lg bg-blue" },
+                  {
+                    className: "btn btn-lg bg-blue",
+                    onClick: function () {
+                      return _this.takeSnapshot();
+                    }
+                  },
                   "Take Snapshot"
                 )
               ),
@@ -29849,7 +29874,12 @@ var App = (function (_React$Component) {
                 null,
                 React.createElement(
                   "button",
-                  { className: "btn btn-lg bg-red" },
+                  {
+                    className: "btn btn-lg bg-red",
+                    onClick: function () {
+                      return _this.flush();
+                    }
+                  },
                   "Flush"
                 )
               )
@@ -30318,6 +30348,7 @@ var StoresView = (function (_React$Component) {
       value: function render() {
         var _this = this;
 
+        // XXX need to recycle individual stores
         return React.createElement(
           "div",
           { className: "row" },

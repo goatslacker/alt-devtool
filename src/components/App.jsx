@@ -7,6 +7,21 @@ import StoresView from './StoresView.jsx'
 import Tabs from 'react-simpletabs'
 
 class App extends React.Component {
+  postMessage(action, data) {
+    this.props.connection.postMessage({
+      name: 'alt-interface',
+      payload: { action, data }
+    })
+  }
+
+  takeSnapshot() {
+    this.postMessage('SNAPSHOT')
+  }
+
+  flush() {
+    this.postMessage('FLUSH')
+  }
+
   render() {
     //    <i className="fa fa-dot-circle-o"></i> Record
     //    <i className="fa fa-pause"></i> Pause
@@ -32,12 +47,18 @@ class App extends React.Component {
         <Tabs.Panel title="Tools">
           <div className="sp-lg txt-center">
             <label>
-              <button className="btn btn-lg bg-blue">
+              <button
+                className="btn btn-lg bg-blue"
+                onClick={() => this.takeSnapshot()}
+              >
                 Take Snapshot
               </button>
             </label>
             <label>
-              <button className="btn btn-lg bg-red">
+              <button
+                className="btn btn-lg bg-red"
+                onClick={() => this.flush()}
+              >
                 Flush
               </button>
             </label>

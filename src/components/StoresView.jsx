@@ -39,6 +39,7 @@ class StoresView extends React.Component {
   }
 
   render() {
+    // XXX need to recycle individual stores
     return (
       <div className="row">
         <div className="col c4" ref="table">
