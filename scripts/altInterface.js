@@ -90,6 +90,13 @@
           stores: parseStores()
         })
       return
+      case 'START_RECORDING':
+      case 'CLEAR_RECORDING':
+      case 'STOP_RECORDING':
+      case 'REPLAY_RECORDING':
+      case 'LOAD_RECORDING':
+      case 'SAVE_RECORDING':
+
     }
   }
 

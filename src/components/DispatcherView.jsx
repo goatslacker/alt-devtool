@@ -3,6 +3,7 @@ import Data from './Data.jsx'
 import DevActions from '../actions/DevActions'
 import FauxTable from './FauxTable.jsx'
 import React from 'react'
+import RecorderView from './RecorderView.jsx'
 
 class DispatcherView extends React.Component {
   constructor() {
@@ -59,6 +60,8 @@ class DispatcherView extends React.Component {
             />
           </div>
           <div className="col c6" style={{ lineHeight: '34px' }}>
+            <RecorderView />
+
             <i
               className="fa fa-ban"
               onClick={this.clearDispatches}

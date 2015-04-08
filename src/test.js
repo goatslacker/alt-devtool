@@ -35,7 +35,6 @@ const XAltStore = XAlt.createStore({
 
 window.XAltActions = XAltActions
 
-// XXX use finalStore actually
 XAlt.dispatcher.register(function (payload) {
   DevActions.addDispatch({
     action: Symbol.keyFor(payload.action),

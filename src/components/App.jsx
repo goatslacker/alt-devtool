@@ -23,14 +23,7 @@ class App extends React.Component {
   }
 
   render() {
-    //    <i className="fa fa-dot-circle-o"></i> Record
-    //    <i className="fa fa-pause"></i> Pause
-    //    <i className="fa fa-play-circle"></i> Play
-    //
-    //    <i className="fa fa-recycle"></i> Recycle
-    //    <i className="fa fa-refresh"></i> Refresh
-    //    <i className="fa fa-filter"></i> Filter
-    //    <i className="fa fa-history"></i> History
+    // XXX revert to previous state of action?
     //    <i className="fa fa-undo"></i> Undo
     return (
       <Tabs>

@@ -29766,7 +29766,7 @@ var DevActions = alt.generateActions("addDispatch", "addStores", "clearDispatche
 
 module.exports = DevActions;
 
-},{"../flux/alt":242}],237:[function(require,module,exports){
+},{"../flux/alt":243}],237:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -29825,9 +29825,7 @@ var App = (function (_React$Component) {
       value: function render() {
         var _this = this;
 
-        //    <i className="fa fa-dot-circle-o"></i> Record
         //    <i className="fa fa-pause"></i> Pause
-        //    <i className="fa fa-play-circle"></i> Play
         //
         //    <i className="fa fa-recycle"></i> Recycle
         //    <i className="fa fa-refresh"></i> Refresh
@@ -29901,7 +29899,7 @@ var App = (function (_React$Component) {
 
 module.exports = App;
 
-},{"../stores/DispatcherSearchStore":243,"../stores/StoresStore":245,"./DispatcherView.jsx":239,"./StoresView.jsx":241,"alt/components/AltContainer":1,"react":235,"react-simpletabs":62}],238:[function(require,module,exports){
+},{"../stores/DispatcherSearchStore":244,"../stores/StoresStore":246,"./DispatcherView.jsx":239,"./StoresView.jsx":242,"alt/components/AltContainer":1,"react":235,"react-simpletabs":62}],238:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -30070,6 +30068,8 @@ var FauxTable = _interopRequire(require("./FauxTable.jsx"));
 
 var React = _interopRequire(require("react"));
 
+var RecorderView = _interopRequire(require("./RecorderView.jsx"));
+
 var DispatcherView = (function (_React$Component) {
   function DispatcherView() {
     _classCallCheck(this, DispatcherView);
@@ -30148,6 +30148,7 @@ var DispatcherView = (function (_React$Component) {
             React.createElement(
               "div",
               { className: "col c6", style: { lineHeight: "34px" } },
+              React.createElement(RecorderView, null),
               React.createElement("i", {
                 className: "fa fa-ban",
                 onClick: this.clearDispatches,
@@ -30219,7 +30220,7 @@ var DispatcherView = (function (_React$Component) {
 
 module.exports = DispatcherView;
 
-},{"../actions/DevActions":236,"./Data.jsx":238,"./FauxTable.jsx":240,"fixed-data-table":60,"react":235}],240:[function(require,module,exports){
+},{"../actions/DevActions":236,"./Data.jsx":238,"./FauxTable.jsx":240,"./RecorderView.jsx":241,"fixed-data-table":60,"react":235}],240:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -30284,6 +30285,83 @@ var FauxTable = (function (_React$Component) {
 module.exports = FauxTable;
 
 },{"react":235}],241:[function(require,module,exports){
+"use strict";
+
+var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+
+var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+var React = _interopRequire(require("react"));
+
+var RecorderView = (function (_React$Component) {
+  function RecorderView(props) {
+    _classCallCheck(this, RecorderView);
+
+    _get(Object.getPrototypeOf(RecorderView.prototype), "constructor", this).call(this, props);
+
+    this.state = {
+      isRecording: false
+    };
+  }
+
+  _inherits(RecorderView, _React$Component);
+
+  _createClass(RecorderView, {
+    renderRecordingButton: {
+      value: function renderRecordingButton() {
+        if (this.state.isRecording) {
+          return React.createElement("i", { className: "fa fa-pause blink" });
+        } else {
+          return React.createElement("i", { className: "fa fa-dot-circle-o" });
+        }
+      }
+    },
+    toggleRecording: {
+      value: function toggleRecording() {
+        this.setState({
+          isRecording: !this.state.isRecording
+        });
+      }
+    },
+    render: {
+      value: function render() {
+        var _this = this;
+
+        return React.createElement(
+          "div",
+          { className: "inline recorder" },
+          React.createElement(
+            "span",
+            { onClick: function () {
+                return _this.toggleRecording();
+              } },
+            this.renderRecordingButton()
+          ),
+          React.createElement(
+            "span",
+            { className: this.state.isRecording ? "" : "disabled" },
+            React.createElement("i", { className: "fa fa-play-circle" }),
+            React.createElement("i", { className: "fa fa-trash" }),
+            React.createElement("i", { className: "fa fa-download" })
+          ),
+          React.createElement("i", { className: "fa fa-upload" })
+        );
+      }
+    }
+  });
+
+  return RecorderView;
+})(React.Component);
+
+module.exports = RecorderView;
+
+},{"react":235}],242:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -30371,7 +30449,7 @@ var StoresView = (function (_React$Component) {
     },
     recycleStore: {
       value: function recycleStore(store) {
-        this.props.postMessage("RECYCLE", { storeName: store });
+        this.props.postMessage("RECYCLE_STORE", { storeName: store });
       }
     },
     selectRow: {
@@ -30429,7 +30507,7 @@ var StoresView = (function (_React$Component) {
 
 module.exports = StoresView;
 
-},{"../actions/DevActions":236,"./Data.jsx":238,"./FauxTable.jsx":240,"fixed-data-table":60,"react":235}],242:[function(require,module,exports){
+},{"../actions/DevActions":236,"./Data.jsx":238,"./FauxTable.jsx":240,"fixed-data-table":60,"react":235}],243:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -30438,7 +30516,7 @@ var Alt = _interopRequire(require("alt"));
 
 module.exports = new Alt();
 
-},{"alt":2}],243:[function(require,module,exports){
+},{"alt":2}],244:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -30535,7 +30613,7 @@ var DispatcherSearchStore = alt.createStore({
 
 module.exports = DispatcherSearchStore;
 
-},{"../actions/DevActions":236,"../flux/alt":242,"../utils/stringScore":247,"./DispatcherStore":244}],244:[function(require,module,exports){
+},{"../actions/DevActions":236,"../flux/alt":243,"../utils/stringScore":248,"./DispatcherStore":245}],245:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -30589,7 +30667,7 @@ var DispatcherStore = alt.createStore({
 
 module.exports = DispatcherStore;
 
-},{"../actions/DevActions":236,"../flux/alt":242,"./StoresStore":245}],245:[function(require,module,exports){
+},{"../actions/DevActions":236,"../flux/alt":243,"./StoresStore":246}],246:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -30627,7 +30705,7 @@ var StoresStore = alt.createStore({
 
 module.exports = StoresStore;
 
-},{"../actions/DevActions":236,"../flux/alt":242}],246:[function(require,module,exports){
+},{"../actions/DevActions":236,"../flux/alt":243}],247:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -30667,7 +30745,6 @@ var XAltStore = XAlt.createStore({
 
 window.XAltActions = XAltActions;
 
-// XXX use finalStore actually
 XAlt.dispatcher.register(function (payload) {
   DevActions.addDispatch({
     action: Symbol.keyFor(payload.action),
@@ -30696,7 +30773,7 @@ DevActions.addStores(parseStores(XAlt));
 // test actions
 XAltActions.foo({ num: Math.random() });
 
-},{"./actions/DevActions":236,"./components/App.jsx":237,"alt":2,"object-assign":61,"react":235}],247:[function(require,module,exports){
+},{"./actions/DevActions":236,"./components/App.jsx":237,"alt":2,"object-assign":61,"react":235}],248:[function(require,module,exports){
 /*!
  * string_score.js: String Scoring Algorithm 0.1.22
  *
@@ -30821,4 +30898,4 @@ function score(string, word, fuzziness) {
 
 module.exports = score;
 
-},{}]},{},[246]);
+},{}]},{},[247]);
