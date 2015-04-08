@@ -1,0 +1,26 @@
+{
+  "manifest_version": 2,
+  "name": "Alt Devtools",
+  "description": "Devtools for debugging and visualizing your flux data through alt",
+  "version": "0.0.1",
+  "minimum_chrome_version": "10.0",
+  "devtools_page": "index.html",
+
+  "background": {
+    "scripts": [
+      "scripts/background.js"
+    ]
+  },
+
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["scripts/hook.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    "scripts/altInterface.js"
+  ]
+}

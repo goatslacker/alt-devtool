@@ -1,22 +1,24 @@
 {
-  "name": "alt-developer-tools-testing",
+  "name": "alt-devtool",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "alt-panel.js",
   "scripts": {
-    "build": "browserify src/index.js -t babelify --outfile dist/build.js",
-    "watch": "watchify src/index.js -t babelify --outfile dist/build.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "browserify -t babelify src -o dist/bundle.js",
+    "watch": "watchify -t babelify src -o dist/bundle.js"
   },
   "author": "Josh Perez <josh@goatslacker.com>",
   "license": "MIT",
-  "dependencies": {
-    "alt": "^0.15.0",
-    "react": "^0.13.1"
-  },
   "devDependencies": {
-    "babel": "^4.7.16",
     "babelify": "^5.0.4",
-    "watchify": "^3.1.0"
+    "browserify": "^9.0.3",
+    "watchify": "^2.4.0"
+  },
+  "dependencies": {
+    "alt": "^0.15.3",
+    "fixed-data-table": "^0.1.2",
+    "object-assign": "^2.0.0",
+    "react": "^0.13.1",
+    "react-simpletabs": "^0.6.1"
   }
 }
