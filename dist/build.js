@@ -29767,8 +29767,6 @@ var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["defau
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
 var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
@@ -29791,7 +29789,9 @@ var App = (function (_React$Component) {
   function App() {
     _classCallCheck(this, App);
 
-    _get(Object.getPrototypeOf(App.prototype), "constructor", this).call(this);
+    if (_React$Component != null) {
+      _React$Component.apply(this, arguments);
+    }
   }
 
   _inherits(App, _React$Component);
@@ -29799,6 +29799,15 @@ var App = (function (_React$Component) {
   _createClass(App, {
     render: {
       value: function render() {
+        //    <i className="fa fa-dot-circle-o"></i> Record
+        //    <i className="fa fa-pause"></i> Pause
+        //    <i className="fa fa-play-circle"></i> Play
+        //
+        //    <i className="fa fa-recycle"></i> Recycle
+        //    <i className="fa fa-refresh"></i> Refresh
+        //    <i className="fa fa-filter"></i> Filter
+        //    <i className="fa fa-history"></i> History
+        //    <i className="fa fa-undo"></i> Undo
         return React.createElement(
           Tabs,
           null,
@@ -30061,16 +30070,6 @@ var DispatcherView = (function (_React$Component) {
       value: function render() {
         var _this = this;
 
-        //    <i className="fa fa-dot-circle-o"></i> Record
-        //    <i className="fa fa-pause"></i> Pause
-        //    <i className="fa fa-play-circle"></i> Play
-        //
-        //    <i className="fa fa-recycle"></i> Recycle
-        //    <i className="fa fa-refresh"></i> Refresh
-        //    <i className="fa fa-filter"></i> Filter
-        //    <i className="fa fa-history"></i> History
-        //    <i className="fa fa-undo"></i> Undo
-
         // XXX table needs a max height of the document - a few px
         // table needs to resize, take up full remaining height of document
         // when selecting a row, highlight it.
@@ -30079,18 +30078,39 @@ var DispatcherView = (function (_React$Component) {
           "div",
           null,
           React.createElement(
-            "button",
-            { className: "btn btn-sm bg-red", onClick: this.clearDispatches },
-            React.createElement("i", { className: "fa fa-ban" }),
-            " Clear Dispatches"
-          ),
-          " ",
-          React.createElement("input", { type: "text", value: this.props.searchValue, onChange: this.doSearch }),
-          React.createElement(
-            "label",
-            null,
-            "Log Dispatches",
-            React.createElement("input", { type: "checkbox", checked: this.props.logDispatches, onChange: this.toggleLogDispatch })
+            "div",
+            { className: "row" },
+            React.createElement(
+              "div",
+              { className: "col c6" },
+              React.createElement("input", {
+                onChange: this.doSearch,
+                placeholder: "Filter dispatches",
+                style: { width: "100%" },
+                type: "text",
+                value: this.props.searchValue
+              })
+            ),
+            React.createElement(
+              "div",
+              { className: "col c6", style: { lineHeight: "34px" } },
+              React.createElement("i", {
+                className: "fa fa-ban",
+                onClick: this.clearDispatches,
+                style: { margin: "0 1em" },
+                title: "Clear Dispatches"
+              }),
+              React.createElement(
+                "label",
+                { className: "inline", style: { margin: "0" } },
+                React.createElement("input", {
+                  checked: this.props.logDispatches,
+                  onChange: this.toggleLogDispatch,
+                  type: "checkbox"
+                }),
+                "Log Dispatches"
+              )
+            )
           ),
           React.createElement(
             "div",

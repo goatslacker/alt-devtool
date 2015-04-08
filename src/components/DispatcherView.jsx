@@ -44,15 +44,6 @@ class DispatcherView extends React.Component {
   }
 
   render() {
-//    <i className="fa fa-dot-circle-o"></i> Record
-//    <i className="fa fa-pause"></i> Pause
-//    <i className="fa fa-play-circle"></i> Play
-//
-//    <i className="fa fa-recycle"></i> Recycle
-//    <i className="fa fa-refresh"></i> Refresh
-//    <i className="fa fa-filter"></i> Filter
-//    <i className="fa fa-history"></i> History
-//    <i className="fa fa-undo"></i> Undo
 
 // XXX table needs a max height of the document - a few px
     // table needs to resize, take up full remaining height of document
@@ -60,16 +51,33 @@ class DispatcherView extends React.Component {
     // I need a "payload" header
     return (
       <div>
-        <button className="btn btn-sm bg-red" onClick={this.clearDispatches}>
-          <i className="fa fa-ban"></i> Clear Dispatches
-        </button>
-        {' '}
-        <input type="text" value={this.props.searchValue} onChange={this.doSearch} />
-
-        <label>
-          Log Dispatches
-          <input type="checkbox" checked={this.props.logDispatches} onChange={this.toggleLogDispatch} />
-        </label>
+        <div className="row">
+          <div className="col c6">
+            <input
+              onChange={this.doSearch}
+              placeholder="Filter dispatches"
+              style={{ width: '100%' }}
+              type="text"
+              value={this.props.searchValue}
+            />
+          </div>
+          <div className="col c6" style={{ lineHeight: '34px' }}>
+            <i
+              className="fa fa-ban"
+              onClick={this.clearDispatches}
+              style={{ margin: '0 1em' }}
+              title="Clear Dispatches"
+            />
+            <label className="inline" style={{ margin: '0' }}>
+              <input
+                checked={this.props.logDispatches}
+                onChange={this.toggleLogDispatch}
+                type="checkbox"
+              />
+              Log Dispatches
+            </label>
+          </div>
+        </div>
 
         <div className="row">
           <div className="col c6">
