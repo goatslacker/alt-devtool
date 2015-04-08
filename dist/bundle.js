@@ -30371,7 +30371,7 @@ var StoresView = (function (_React$Component) {
     },
     recycleStore: {
       value: function recycleStore(store) {
-        this.props.postMessage("RECYCLE", { storeName: store });
+        this.props.postMessage("RECYCLE_STORE", { storeName: store });
       }
     },
     selectRow: {

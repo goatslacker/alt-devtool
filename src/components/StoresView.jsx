@@ -49,7 +49,7 @@ class StoresView extends React.Component {
   }
 
   recycleStore(store) {
-    this.props.postMessage('RECYCLE', { storeName: store })
+    this.props.postMessage('RECYCLE_STORE', { storeName: store })
   }
 
   selectRow(ev, id, rowData) {
