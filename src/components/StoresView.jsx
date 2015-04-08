@@ -1,6 +1,7 @@
 import { Column, Table } from 'fixed-data-table'
 import Data from './Data.jsx'
 import DevActions from '../actions/DevActions'
+import FauxTable from './FauxTable.jsx'
 import React from 'react'
 
 class StoresView extends React.Component {
@@ -14,9 +15,10 @@ class StoresView extends React.Component {
   }
 
   componentDidMount() {
+    const table = React.findDOMNode(this.refs.table)
     this.setState({
-      height: window.innerHeight - 150,
-      width: window.innerWidth / 3 - 40
+      height: window.innerHeight - 26, // 26 is tabs height
+      width: table.clientWidth - 6 // 6 is some magic number
     })
   }
 
@@ -39,7 +41,7 @@ class StoresView extends React.Component {
   render() {
     return (
       <div className="row">
-        <div className="col c4">
+        <div className="col c4" ref="table">
           <Table
             headerHeight={40}
             height={this.state.height}
@@ -59,18 +61,9 @@ class StoresView extends React.Component {
         </div>
 
         <div className="col c8">
-          <div className="public_fixedDataTable_main">
-            <div className="public_fixedDataTable_header">
-              <div className="public_fixedDataTableCell_main">
-                <div className="public_fixedDataTableCell_cellContent">
-                  State
-                </div>
-              </div>
-            </div>
-            <div className="public_fixedDataTableCell_main">
-              <Data data={this.getStoreState()} />
-            </div>
-          </div>
+          <FauxTable title="State" height={this.state.height}>
+            <Data data={this.getStoreState()} />
+          </FauxTable>
         </div>
       </div>
     )

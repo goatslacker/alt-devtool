@@ -29760,7 +29760,7 @@ var DevActions = alt.generateActions("addDispatch", "addStores", "clearDispatche
 
 module.exports = DevActions;
 
-},{"../flux/alt":242}],238:[function(require,module,exports){
+},{"../flux/alt":243}],238:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -29848,7 +29848,7 @@ var App = (function (_React$Component) {
 
 module.exports = App;
 
-},{"../stores/DispatcherSearchStore":244,"../stores/StoresStore":246,"./DispatcherView.jsx":240,"./StoresView.jsx":241,"alt/components/AltContainer":1,"react":235,"react-simpletabs":62}],239:[function(require,module,exports){
+},{"../stores/DispatcherSearchStore":245,"../stores/StoresStore":247,"./DispatcherView.jsx":240,"./StoresView.jsx":242,"alt/components/AltContainer":1,"react":235,"react-simpletabs":62}],239:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -30011,6 +30011,8 @@ var Data = _interopRequire(require("./Data.jsx"));
 
 var DevActions = _interopRequire(require("../actions/DevActions"));
 
+var FauxTable = _interopRequire(require("./FauxTable.jsx"));
+
 var React = _interopRequire(require("react"));
 
 var DispatcherView = (function (_React$Component) {
@@ -30021,7 +30023,7 @@ var DispatcherView = (function (_React$Component) {
 
     this.state = {
       height: 300,
-      width: 600
+      width: 300
     };
   }
 
@@ -30030,9 +30032,10 @@ var DispatcherView = (function (_React$Component) {
   _createClass(DispatcherView, {
     componentDidMount: {
       value: function componentDidMount() {
+        var table = React.findDOMNode(this.refs.table);
         this.setState({
-          height: window.innerHeight - 150,
-          width: window.innerWidth / 2 - 40
+          height: window.innerHeight - 60, // 60 is tabs + filter panel
+          width: table.clientWidth - 6 // 6 is some magic number
         });
       }
     },
@@ -30070,10 +30073,6 @@ var DispatcherView = (function (_React$Component) {
       value: function render() {
         var _this = this;
 
-        // XXX table needs a max height of the document - a few px
-        // table needs to resize, take up full remaining height of document
-        // when selecting a row, highlight it.
-        // I need a "payload" header
         return React.createElement(
           "div",
           null,
@@ -30117,7 +30116,7 @@ var DispatcherView = (function (_React$Component) {
             { className: "row" },
             React.createElement(
               "div",
-              { className: "col c6" },
+              { className: "col c6", ref: "table" },
               React.createElement(
                 Table,
                 {
@@ -30149,26 +30148,9 @@ var DispatcherView = (function (_React$Component) {
               "div",
               { className: "col c6" },
               React.createElement(
-                "div",
-                { className: "public_fixedDataTable_main" },
-                React.createElement(
-                  "div",
-                  { className: "public_fixedDataTable_header" },
-                  React.createElement(
-                    "div",
-                    { className: "public_fixedDataTableCell_main" },
-                    React.createElement(
-                      "div",
-                      { className: "public_fixedDataTableCell_cellContent" },
-                      "Payload"
-                    )
-                  )
-                ),
-                React.createElement(
-                  "div",
-                  { className: "public_fixedDataTableCell_main" },
-                  React.createElement(Data, { data: this.props.selectedPayload })
-                )
+                FauxTable,
+                { title: "Payload", height: this.state.height },
+                React.createElement(Data, { data: this.props.selectedPayload })
               )
             )
           )
@@ -30182,7 +30164,71 @@ var DispatcherView = (function (_React$Component) {
 
 module.exports = DispatcherView;
 
-},{"../actions/DevActions":237,"./Data.jsx":239,"fixed-data-table":60,"react":235}],241:[function(require,module,exports){
+},{"../actions/DevActions":237,"./Data.jsx":239,"./FauxTable.jsx":241,"fixed-data-table":60,"react":235}],241:[function(require,module,exports){
+"use strict";
+
+var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+
+var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+var React = _interopRequire(require("react"));
+
+var FauxTable = (function (_React$Component) {
+  function FauxTable() {
+    _classCallCheck(this, FauxTable);
+
+    if (_React$Component != null) {
+      _React$Component.apply(this, arguments);
+    }
+  }
+
+  _inherits(FauxTable, _React$Component);
+
+  _createClass(FauxTable, {
+    render: {
+      value: function render() {
+        return React.createElement(
+          "div",
+          { className: "public_fixedDataTable_main" },
+          React.createElement(
+            "div",
+            { className: "public_fixedDataTable_header" },
+            React.createElement(
+              "div",
+              {
+                className: "public_fixedDataTableCell_main",
+                style: { height: "39px" }
+              },
+              React.createElement(
+                "div",
+                { className: "public_fixedDataTableCell_cellContent" },
+                this.props.title
+              )
+            )
+          ),
+          React.createElement(
+            "div",
+            {
+              className: "public_fixedDataTableCell_main",
+              style: { height: "" + (this.props.height - 40) + "px", overflow: "scroll" }
+            },
+            this.props.children
+          )
+        );
+      }
+    }
+  });
+
+  return FauxTable;
+})(React.Component);
+
+module.exports = FauxTable;
+
+},{"react":235}],242:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -30204,6 +30250,8 @@ var Data = _interopRequire(require("./Data.jsx"));
 
 var DevActions = _interopRequire(require("../actions/DevActions"));
 
+var FauxTable = _interopRequire(require("./FauxTable.jsx"));
+
 var React = _interopRequire(require("react"));
 
 var StoresView = (function (_React$Component) {
@@ -30223,9 +30271,10 @@ var StoresView = (function (_React$Component) {
   _createClass(StoresView, {
     componentDidMount: {
       value: function componentDidMount() {
+        var table = React.findDOMNode(this.refs.table);
         this.setState({
-          height: window.innerHeight - 150,
-          width: window.innerWidth / 3 - 40
+          height: window.innerHeight - 26, // 26 is tabs height
+          width: table.clientWidth - 6 // 6 is some magic number
         });
       }
     },
@@ -30257,7 +30306,7 @@ var StoresView = (function (_React$Component) {
           { className: "row" },
           React.createElement(
             "div",
-            { className: "col c4" },
+            { className: "col c4", ref: "table" },
             React.createElement(
               Table,
               {
@@ -30283,26 +30332,9 @@ var StoresView = (function (_React$Component) {
             "div",
             { className: "col c8" },
             React.createElement(
-              "div",
-              { className: "public_fixedDataTable_main" },
-              React.createElement(
-                "div",
-                { className: "public_fixedDataTable_header" },
-                React.createElement(
-                  "div",
-                  { className: "public_fixedDataTableCell_main" },
-                  React.createElement(
-                    "div",
-                    { className: "public_fixedDataTableCell_cellContent" },
-                    "State"
-                  )
-                )
-              ),
-              React.createElement(
-                "div",
-                { className: "public_fixedDataTableCell_main" },
-                React.createElement(Data, { data: this.getStoreState() })
-              )
+              FauxTable,
+              { title: "State", height: this.state.height },
+              React.createElement(Data, { data: this.getStoreState() })
             )
           )
         );
@@ -30315,7 +30347,7 @@ var StoresView = (function (_React$Component) {
 
 module.exports = StoresView;
 
-},{"../actions/DevActions":237,"./Data.jsx":239,"fixed-data-table":60,"react":235}],242:[function(require,module,exports){
+},{"../actions/DevActions":237,"./Data.jsx":239,"./FauxTable.jsx":241,"fixed-data-table":60,"react":235}],243:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -30324,7 +30356,7 @@ var Alt = _interopRequire(require("alt"));
 
 module.exports = new Alt();
 
-},{"alt":2}],243:[function(require,module,exports){
+},{"alt":2}],244:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -30399,7 +30431,7 @@ XAltActions.bar({ num: Math.random() });
 XAltActions.foo({ num: Math.random() });
 XAltActions.baz({ num: Math.random() });
 
-},{"./actions/DevActions":237,"./components/App.jsx":238,"alt":2,"object-assign":61,"react":235}],244:[function(require,module,exports){
+},{"./actions/DevActions":237,"./components/App.jsx":238,"alt":2,"object-assign":61,"react":235}],245:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -30496,7 +30528,7 @@ var DispatcherSearchStore = alt.createStore({
 
 module.exports = DispatcherSearchStore;
 
-},{"../actions/DevActions":237,"../flux/alt":242,"../utils/stringScore":247,"./DispatcherStore":245}],245:[function(require,module,exports){
+},{"../actions/DevActions":237,"../flux/alt":243,"../utils/stringScore":248,"./DispatcherStore":246}],246:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -30550,7 +30582,7 @@ var DispatcherStore = alt.createStore({
 
 module.exports = DispatcherStore;
 
-},{"../actions/DevActions":237,"../flux/alt":242,"./StoresStore":246}],246:[function(require,module,exports){
+},{"../actions/DevActions":237,"../flux/alt":243,"./StoresStore":247}],247:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -30588,7 +30620,7 @@ var StoresStore = alt.createStore({
 
 module.exports = StoresStore;
 
-},{"../actions/DevActions":237,"../flux/alt":242}],247:[function(require,module,exports){
+},{"../actions/DevActions":237,"../flux/alt":243}],248:[function(require,module,exports){
 /*!
  * string_score.js: String Scoring Algorithm 0.1.22
  *
@@ -30713,4 +30745,4 @@ function score(string, word, fuzziness) {
 
 module.exports = score;
 
-},{}]},{},[243]);
+},{}]},{},[244]);

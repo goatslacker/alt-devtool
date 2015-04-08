@@ -1,6 +1,7 @@
 import { Column, Table } from 'fixed-data-table'
 import Data from './Data.jsx'
 import DevActions from '../actions/DevActions'
+import FauxTable from './FauxTable.jsx'
 import React from 'react'
 
 class DispatcherView extends React.Component {
@@ -9,14 +10,15 @@ class DispatcherView extends React.Component {
 
     this.state = {
       height: 300,
-      width: 600
+      width: 300
     }
   }
 
   componentDidMount() {
+    const table = React.findDOMNode(this.refs.table)
     this.setState({
-      height: window.innerHeight - 150,
-      width: window.innerWidth / 2 - 40
+      height: window.innerHeight - 60, // 60 is tabs + filter panel
+      width: table.clientWidth - 6 // 6 is some magic number
     })
   }
 
@@ -44,11 +46,6 @@ class DispatcherView extends React.Component {
   }
 
   render() {
-
-// XXX table needs a max height of the document - a few px
-    // table needs to resize, take up full remaining height of document
-    // when selecting a row, highlight it.
-    // I need a "payload" header
     return (
       <div>
         <div className="row">
@@ -80,7 +77,7 @@ class DispatcherView extends React.Component {
         </div>
 
         <div className="row">
-          <div className="col c6">
+          <div className="col c6" ref="table">
             <Table
               headerHeight={40}
               height={this.state.height}
@@ -105,18 +102,9 @@ class DispatcherView extends React.Component {
             </Table>
           </div>
           <div className="col c6">
-            <div className="public_fixedDataTable_main">
-              <div className="public_fixedDataTable_header">
-                <div className="public_fixedDataTableCell_main">
-                  <div className="public_fixedDataTableCell_cellContent">
-                    Payload
-                  </div>
-                </div>
-              </div>
-              <div className="public_fixedDataTableCell_main">
-                <Data data={this.props.selectedPayload} />
-              </div>
-            </div>
+            <FauxTable title="Payload" height={this.state.height}>
+              <Data data={this.props.selectedPayload} />
+            </FauxTable>
           </div>
         </div>
       </div>
