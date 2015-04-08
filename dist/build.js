@@ -30120,7 +30120,7 @@ var DispatcherView = (function (_React$Component) {
               React.createElement(
                 Table,
                 {
-                  headerHeight: 40,
+                  headerHeight: 20,
                   height: this.state.height,
                   onRowClick: this.selectRow,
                   rowGetter: function (idx) {
@@ -30201,7 +30201,7 @@ var FauxTable = (function (_React$Component) {
               "div",
               {
                 className: "public_fixedDataTableCell_main",
-                style: { height: "39px" }
+                style: { height: "19px" }
               },
               React.createElement(
                 "div",
@@ -30214,7 +30214,7 @@ var FauxTable = (function (_React$Component) {
             "div",
             {
               className: "public_fixedDataTableCell_main",
-              style: { height: "" + (this.props.height - 40) + "px", overflow: "scroll" }
+              style: { height: "" + (this.props.height - 20) + "px", overflow: "scroll" }
             },
             this.props.children
           )
@@ -30310,7 +30310,7 @@ var StoresView = (function (_React$Component) {
             React.createElement(
               Table,
               {
-                headerHeight: 40,
+                headerHeight: 20,
                 height: this.state.height,
                 onRowClick: this.selectRow,
                 rowGetter: function (idx) {

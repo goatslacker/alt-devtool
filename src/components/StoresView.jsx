@@ -43,7 +43,7 @@ class StoresView extends React.Component {
       <div className="row">
         <div className="col c4" ref="table">
           <Table
-            headerHeight={40}
+            headerHeight={20}
             height={this.state.height}
             onRowClick={this.selectRow}
             rowGetter={(idx) => this.props.stores[idx]}

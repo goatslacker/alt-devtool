@@ -18,3 +18,8 @@ a {
 .tabs-menu-item.is-active {
   background: #cacaca;
 }
+
+.public_fixedDataTable_header .public_fixedDataTableCell_cellContent {
+  font-size: 0.8em;
+  padding: 0 0.5em;
+}

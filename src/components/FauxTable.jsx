@@ -7,7 +7,7 @@ class FauxTable extends React.Component {
         <div className="public_fixedDataTable_header">
           <div
             className="public_fixedDataTableCell_main"
-            style={{ height: '39px' }}
+            style={{ height: '19px' }}
           >
             <div className="public_fixedDataTableCell_cellContent">
               {this.props.title}
@@ -16,7 +16,7 @@ class FauxTable extends React.Component {
         </div>
         <div
           className="public_fixedDataTableCell_main"
-          style={{ height: `${this.props.height - 40}px`, overflow: 'scroll' }}
+          style={{ height: `${this.props.height - 20}px`, overflow: 'scroll' }}
         >
           {this.props.children}
         </div>

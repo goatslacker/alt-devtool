@@ -79,7 +79,7 @@ class DispatcherView extends React.Component {
         <div className="row">
           <div className="col c6" ref="table">
             <Table
-              headerHeight={40}
+              headerHeight={20}
               height={this.state.height}
               onRowClick={this.selectRow}
               rowGetter={(idx) => this.props.dispatches[idx]}
