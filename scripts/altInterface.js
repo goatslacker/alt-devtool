@@ -1,5 +1,6 @@
 (function () {
   const TIMEOUT = 10000
+  const ALT = 'goatslacker.github.io/alt/'
   poke(100)
 
   function poke(time) {
@@ -7,7 +8,7 @@
       return
     }
 
-    if (window.Alt) {
+    if (window[ALT]) {
       register()
     } else {
       setTimeout(function () {
@@ -17,8 +18,8 @@
   }
 
   function parseStores() {
-    return Object.keys(window.Alt.stores).map(function (storeName) {
-      var store = window.Alt.stores[storeName]
+    return Object.keys(window[ALT].stores).map(function (storeName) {
+      var store = window[ALT].stores[storeName]
       return {
         name: storeName,
         state: JSON.stringify(store.getState()),
@@ -33,7 +34,7 @@
     var cachedStores = []
 
     // XXX it would be great if I could capture the stack trace of where these actions are triggered
-    window.Alt.dispatcher.register(function (payload) {
+    window[ALT].dispatcher.register(function (payload) {
       post('STORES', {
         stores: parseStores()
       })
@@ -78,13 +79,13 @@
         })
       return
       case 'SNAPSHOT':
-        console.log(window.Alt.takeSnapshot())
+        console.log(window[ALT].takeSnapshot())
       return
       case 'FLUSH':
-        console.log(window.Alt.flush())
+        console.log(window[ALT].flush())
       return
       case 'RECYCLE_STORE':
-        window.Alt.recycle(message.payload.data.storeName)
+        window[ALT].recycle(message.payload.data.storeName)
         post('STORES', {
           stores: parseStores()
         })
