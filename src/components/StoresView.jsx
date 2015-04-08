@@ -29,9 +29,27 @@ class StoresView extends React.Component {
   }
 
   highlightColumn(store, key, obj, id) {
+    const node = (
+      <div className="row">
+        <div className="col c11">
+          {store}
+        </div>
+        <div className="col c1 txt-right">
+          <i
+            className="fa fa-recycle"
+            onClick={() => this.recycleStore(store)}
+          />
+        </div>
+      </div>
+    )
+
     return id === this.props.selectedStore
-      ? <div style={{ background: '#70bde6' }}>{store}</div>
-      : store
+      ? <div style={{ background: '#70bde6' }}>{node}</div>
+      : node
+  }
+
+  recycleStore(store) {
+    this.props.postMessage('RECYCLE', { storeName: store })
   }
 
   selectRow(ev, id, rowData) {
@@ -48,7 +66,7 @@ class StoresView extends React.Component {
             height={this.state.height}
             onRowClick={this.selectRow}
             rowGetter={(idx) => this.props.stores[idx]}
-            rowHeight={40}
+            rowHeight={35}
             rowsCount={this.props.stores.length}
             width={this.state.width}
           >

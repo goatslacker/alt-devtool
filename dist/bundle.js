@@ -29852,7 +29852,7 @@ var App = (function (_React$Component) {
             React.createElement(
               AltContainer,
               { store: StoresStore },
-              React.createElement(StoresView, null)
+              React.createElement(StoresView, { postMessage: this.postMessage.bind(this) })
             )
           ),
           React.createElement(
@@ -30162,7 +30162,7 @@ var DispatcherView = (function (_React$Component) {
                   onChange: this.toggleLogDispatch,
                   type: "checkbox"
                 }),
-                "Log Dispatches"
+                " Log Dispatches"
               )
             )
           ),
@@ -30181,7 +30181,7 @@ var DispatcherView = (function (_React$Component) {
                   rowGetter: function (idx) {
                     return _this.props.dispatches[idx];
                   },
-                  rowHeight: 40,
+                  rowHeight: 35,
                   rowsCount: this.props.dispatches.length,
                   width: this.state.width
                 },
@@ -30340,11 +30340,38 @@ var StoresView = (function (_React$Component) {
     },
     highlightColumn: {
       value: function highlightColumn(store, key, obj, id) {
+        var _this = this;
+
+        var node = React.createElement(
+          "div",
+          { className: "row" },
+          React.createElement(
+            "div",
+            { className: "col c11" },
+            store
+          ),
+          React.createElement(
+            "div",
+            { className: "col c1 txt-right" },
+            React.createElement("i", {
+              className: "fa fa-recycle",
+              onClick: function () {
+                return _this.recycleStore(store);
+              }
+            })
+          )
+        );
+
         return id === this.props.selectedStore ? React.createElement(
           "div",
           { style: { background: "#70bde6" } },
-          store
-        ) : store;
+          node
+        ) : node;
+      }
+    },
+    recycleStore: {
+      value: function recycleStore(store) {
+        this.props.postMessage("RECYCLE", { storeName: store });
       }
     },
     selectRow: {
@@ -30372,7 +30399,7 @@ var StoresView = (function (_React$Component) {
                 rowGetter: function (idx) {
                   return _this.props.stores[idx];
                 },
-                rowHeight: 40,
+                rowHeight: 35,
                 rowsCount: this.props.stores.length,
                 width: this.state.width
               },

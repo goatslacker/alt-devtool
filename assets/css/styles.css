@@ -28,7 +28,8 @@ a {
 }
 
 .public_fixedDataTableCell_cellContent {
-  font-size: 0.8em;
+  font-size: 0.7em;
+  padding: 0 0.5em;
 }
 
 .btn.btn-lg {

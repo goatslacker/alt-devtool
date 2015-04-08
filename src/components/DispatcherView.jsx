@@ -71,6 +71,7 @@ class DispatcherView extends React.Component {
                 onChange={this.toggleLogDispatch}
                 type="checkbox"
               />
+              {' '}
               Log Dispatches
             </label>
           </div>
@@ -83,7 +84,7 @@ class DispatcherView extends React.Component {
               height={this.state.height}
               onRowClick={this.selectRow}
               rowGetter={(idx) => this.props.dispatches[idx]}
-              rowHeight={40}
+              rowHeight={35}
               rowsCount={this.props.dispatches.length}
               width={this.state.width}
             >

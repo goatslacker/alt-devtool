@@ -41,7 +41,7 @@ class App extends React.Component {
         </Tabs.Panel>
         <Tabs.Panel title="Stores">
           <AltContainer store={StoresStore}>
-            <StoresView />
+            <StoresView postMessage={this.postMessage.bind(this)} />
           </AltContainer>
         </Tabs.Panel>
         <Tabs.Panel title="Tools">

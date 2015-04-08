@@ -78,7 +78,7 @@
         })
       return
       case 'SNAPSHOT':
-        console.log(JSON.parse(window.Alt.takeSnapshot()))
+        console.log(window.Alt.takeSnapshot())
       return
       case 'FLUSH':
         console.log(window.Alt.flush())
