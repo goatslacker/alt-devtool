@@ -30347,12 +30347,12 @@ var StoresView = (function (_React$Component) {
           { className: "row" },
           React.createElement(
             "div",
-            { className: "col c11" },
+            { className: "col c10" },
             store
           ),
           React.createElement(
             "div",
-            { className: "col c1 txt-right" },
+            { className: "col c2" },
             React.createElement("i", {
               className: "fa fa-recycle",
               onClick: function () {
@@ -30383,7 +30383,6 @@ var StoresView = (function (_React$Component) {
       value: function render() {
         var _this = this;
 
-        // XXX need to recycle individual stores
         return React.createElement(
           "div",
           { className: "row" },

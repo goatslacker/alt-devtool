@@ -31,10 +31,10 @@ class StoresView extends React.Component {
   highlightColumn(store, key, obj, id) {
     const node = (
       <div className="row">
-        <div className="col c11">
+        <div className="col c10">
           {store}
         </div>
-        <div className="col c1 txt-right">
+        <div className="col c2">
           <i
             className="fa fa-recycle"
             onClick={() => this.recycleStore(store)}
@@ -57,7 +57,6 @@ class StoresView extends React.Component {
   }
 
   render() {
-    // XXX need to recycle individual stores
     return (
       <div className="row">
         <div className="col c4" ref="table">
