@@ -6,6 +6,7 @@ const DevActions = alt.generateActions(
   'clearDispatches',
   'search',
   'selectRow',
+  'selectStore',
   'toggleLogDispatch'
 )
 

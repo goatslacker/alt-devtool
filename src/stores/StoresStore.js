@@ -5,13 +5,28 @@ const StoresStore = alt.createStore({
   displayName: 'StoresStore',
 
   bindListeners: {
-    addStores: DevActions.addStores
+    addStores: DevActions.addStores,
+    selectStore: DevActions.selectStore
   },
 
-  state: { stores: [] },
+  state: {
+    selectedStore: null,
+    stores: []
+  },
 
   addStores(stores) {
-    return this.setState({ stores })
+    const selectedStore = this.state.selectedStore === null
+      ? this.state.stores.length ? 0 : null
+      : this.state.selectedStore
+
+    return this.setState({
+      selectedStore,
+      stores
+    })
+  },
+
+  selectStore(id) {
+    this.state.selectedStore = id
   }
 })
 

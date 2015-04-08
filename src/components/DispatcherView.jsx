@@ -68,7 +68,7 @@ class DispatcherView extends React.Component {
 
         <label>
           Log Dispatches
-          <input type="checkbox" checked={this.props.logDispatches} onClick={this.toggleLogDispatch} />
+          <input type="checkbox" checked={this.props.logDispatches} onChange={this.toggleLogDispatch} />
         </label>
 
         <div className="row">
@@ -97,17 +97,17 @@ class DispatcherView extends React.Component {
             </Table>
           </div>
           <div className="col c6">
-          <div className="public_fixedDataTable_main">
-            <div className="public_fixedDataTable_header">
-              <div className="public_fixedDataTableCell_main">
-                <div className="public_fixedDataTableCell_cellContent">
-                  Payload
+            <div className="public_fixedDataTable_main">
+              <div className="public_fixedDataTable_header">
+                <div className="public_fixedDataTableCell_main">
+                  <div className="public_fixedDataTableCell_cellContent">
+                    Payload
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="public_fixedDataTableCell_main">
-              <Data data={this.props.selectedPayload} />
-            </div>
+              <div className="public_fixedDataTableCell_main">
+                <Data data={this.props.selectedPayload} />
+              </div>
             </div>
           </div>
         </div>

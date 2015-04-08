@@ -29756,7 +29756,7 @@ var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["defau
 
 var alt = _interopRequire(require("../flux/alt"));
 
-var DevActions = alt.generateActions("addDispatch", "addStores", "clearDispatches", "search", "selectRow", "toggleLogDispatch");
+var DevActions = alt.generateActions("addDispatch", "addStores", "clearDispatches", "search", "selectRow", "selectStore", "toggleLogDispatch");
 
 module.exports = DevActions;
 
@@ -30090,7 +30090,7 @@ var DispatcherView = (function (_React$Component) {
             "label",
             null,
             "Log Dispatches",
-            React.createElement("input", { type: "checkbox", checked: this.props.logDispatches, onClick: this.toggleLogDispatch })
+            React.createElement("input", { type: "checkbox", checked: this.props.logDispatches, onChange: this.toggleLogDispatch })
           ),
           React.createElement(
             "div",
@@ -30169,11 +30169,20 @@ var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["defau
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
+var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
+var _fixedDataTable = require("fixed-data-table");
+
+var Column = _fixedDataTable.Column;
+var Table = _fixedDataTable.Table;
+
 var Data = _interopRequire(require("./Data.jsx"));
+
+var DevActions = _interopRequire(require("../actions/DevActions"));
 
 var React = _interopRequire(require("react"));
 
@@ -30181,41 +30190,100 @@ var StoresView = (function (_React$Component) {
   function StoresView() {
     _classCallCheck(this, StoresView);
 
-    if (_React$Component != null) {
-      _React$Component.apply(this, arguments);
-    }
+    _get(Object.getPrototypeOf(StoresView.prototype), "constructor", this).call(this);
+
+    this.state = {
+      height: 300,
+      width: 300
+    };
   }
 
   _inherits(StoresView, _React$Component);
 
   _createClass(StoresView, {
+    componentDidMount: {
+      value: function componentDidMount() {
+        this.setState({
+          height: window.innerHeight - 150,
+          width: window.innerWidth / 3 - 40
+        });
+      }
+    },
+    getStoreState: {
+      value: function getStoreState() {
+        return this.props.selectedStore === null ? {} : JSON.parse(this.props.stores[this.props.selectedStore].state);
+      }
+    },
+    highlightColumn: {
+      value: function highlightColumn(store, key, obj, id) {
+        return id === this.props.selectedStore ? React.createElement(
+          "div",
+          { style: { background: "#70bde6" } },
+          store
+        ) : store;
+      }
+    },
+    selectRow: {
+      value: function selectRow(ev, id, rowData) {
+        DevActions.selectStore(id);
+      }
+    },
     render: {
       value: function render() {
+        var _this = this;
+
         return React.createElement(
           "div",
-          null,
+          { className: "row" },
           React.createElement(
-            "ul",
-            null,
-            this.props.stores.map(function (store, i) {
-              return React.createElement(
-                "li",
-                { key: i },
+            "div",
+            { className: "col c4" },
+            React.createElement(
+              Table,
+              {
+                headerHeight: 40,
+                height: this.state.height,
+                onRowClick: this.selectRow,
+                rowGetter: function (idx) {
+                  return _this.props.stores[idx];
+                },
+                rowHeight: 40,
+                rowsCount: this.props.stores.length,
+                width: this.state.width
+              },
+              React.createElement(Column, {
+                cellRenderer: this.highlightColumn.bind(this),
+                dataKey: "name",
+                label: "Store",
+                width: this.state.width
+              })
+            )
+          ),
+          React.createElement(
+            "div",
+            { className: "col c8" },
+            React.createElement(
+              "div",
+              { className: "public_fixedDataTable_main" },
+              React.createElement(
+                "div",
+                { className: "public_fixedDataTable_header" },
                 React.createElement(
-                  "strong",
-                  null,
-                  store.name
-                ),
-                " (",
-                React.createElement(
-                  "span",
-                  null,
-                  store.dispatchId
-                ),
-                ")",
-                React.createElement(Data, { data: JSON.parse(store.state) })
-              );
-            })
+                  "div",
+                  { className: "public_fixedDataTableCell_main" },
+                  React.createElement(
+                    "div",
+                    { className: "public_fixedDataTableCell_cellContent" },
+                    "State"
+                  )
+                )
+              ),
+              React.createElement(
+                "div",
+                { className: "public_fixedDataTableCell_main" },
+                React.createElement(Data, { data: this.getStoreState() })
+              )
+            )
           )
         );
       }
@@ -30227,7 +30295,7 @@ var StoresView = (function (_React$Component) {
 
 module.exports = StoresView;
 
-},{"./Data.jsx":239,"react":235}],242:[function(require,module,exports){
+},{"../actions/DevActions":237,"./Data.jsx":239,"fixed-data-table":60,"react":235}],242:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -30475,13 +30543,26 @@ var StoresStore = alt.createStore({
   displayName: "StoresStore",
 
   bindListeners: {
-    addStores: DevActions.addStores
+    addStores: DevActions.addStores,
+    selectStore: DevActions.selectStore
   },
 
-  state: { stores: [] },
+  state: {
+    selectedStore: null,
+    stores: []
+  },
 
   addStores: function addStores(stores) {
-    return this.setState({ stores: stores });
+    var selectedStore = this.state.selectedStore === null ? this.state.stores.length ? 0 : null : this.state.selectedStore;
+
+    return this.setState({
+      selectedStore: selectedStore,
+      stores: stores
+    });
+  },
+
+  selectStore: function selectStore(id) {
+    this.state.selectedStore = id;
   }
 });
 
