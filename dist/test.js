@@ -30637,13 +30637,67 @@ var assign = _interopRequire(require("object-assign"));
 
 Object.assign = Object.assign || assign;
 
+var Alt = _interopRequire(require("alt"));
+
 var App = _interopRequire(require("./components/App.jsx"));
+
+var DevActions = _interopRequire(require("./actions/DevActions"));
 
 var React = _interopRequire(require("react"));
 
 React.render(React.createElement(App, { connection: null }), document.getElementById("alt-devtool"));
 
-},{"./components/App.jsx":237,"object-assign":61,"react":235}],247:[function(require,module,exports){
+// The simulated background script
+var XAlt = new Alt();
+
+var XAltActions = XAlt.generateActions("foo", "bar", "baz");
+
+var XAltStore = XAlt.createStore({
+  displayName: "TestStore",
+
+  bindListeners: {
+    foo: XAltActions.foo
+  },
+
+  state: { a: 0, b: 0, c: 0 },
+
+  foo: function foo(x) {
+    this.setState({ a: x });
+  }
+});
+
+window.XAltActions = XAltActions;
+
+// XXX use finalStore actually
+XAlt.dispatcher.register(function (payload) {
+  DevActions.addDispatch({
+    action: Symbol.keyFor(payload.action),
+    data: payload.data
+  });
+
+  // hack to make sure all stores get the update
+  setTimeout(function () {
+    DevActions.addStores(parseStores(XAlt));
+  }, 0);
+});
+
+function parseStores(alt) {
+  return Object.keys(alt.stores).map(function (storeName) {
+    var store = alt.stores[storeName];
+    return {
+      name: storeName,
+      state: JSON.stringify(store.getState()),
+      dispatchId: store.dispatchToken,
+      listeners: store.boundListeners
+    };
+  });
+}
+DevActions.addStores(parseStores(XAlt));
+
+// test actions
+XAltActions.foo({ num: Math.random() });
+
+},{"./actions/DevActions":236,"./components/App.jsx":237,"alt":2,"object-assign":61,"react":235}],247:[function(require,module,exports){
 /*!
  * string_score.js: String Scoring Algorithm 0.1.22
  *
