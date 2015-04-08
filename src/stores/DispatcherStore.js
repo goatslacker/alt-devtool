@@ -8,13 +8,19 @@ const DispatcherStore = alt.createStore({
   bindListeners: {
     addItem: DevActions.addDispatch,
     clearAll: DevActions.clearDispatches,
+    toggleLogDispatch: DevActions.toggleLogDispatch
   },
 
   state: {
-    dispatches: []
+    dispatches: [],
+    logDispatches: true
   },
 
   addItem(dispatch) {
+    if (!this.state.logDispatches) {
+      return false
+    }
+
     const { stores } = StoresStore.getState()
 
     const dispatchedStores = stores
@@ -31,6 +37,10 @@ const DispatcherStore = alt.createStore({
 
   clearAll() {
     this.state.dispatches = []
+  },
+
+  toggleLogDispatch() {
+    this.state.logDispatches = !this.state.logDispatches
   }
 })
 

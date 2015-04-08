@@ -10,11 +10,13 @@ const DispatcherSearchStore = alt.createStore({
     addItem: DevActions.addDispatch,
     clearAll: DevActions.clearDispatches,
     search: DevActions.search,
-    select: DevActions.selectRow
+    select: DevActions.selectRow,
+    toggleLogDispatch: DevActions.toggleLogDispatch
   },
 
   state: {
     dispatches: [],
+    logDispatches: DispatcherStore.getState().logDispatches,
     searchValue: '',
     selectedPayload: {}
   },
@@ -24,6 +26,12 @@ const DispatcherSearchStore = alt.createStore({
   },
 
   addItem() {
+    const { logDispatches } = DispatcherStore.getState()
+
+    if (!logDispatches) {
+      return false
+    }
+
     return this.updateSearch(this.state.searchValue)
   },
 
@@ -39,6 +47,10 @@ const DispatcherSearchStore = alt.createStore({
 
   select(payload) {
     this.state.selectedPayload = payload
+  },
+
+  toggleLogDispatch() {
+    this.state.logDispatches = DispatcherStore.getState().logDispatches
   },
 
   updateSearch(searchValue) {

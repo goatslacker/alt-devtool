@@ -29756,7 +29756,7 @@ var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["defau
 
 var alt = _interopRequire(require("../flux/alt"));
 
-var DevActions = alt.generateActions("addDispatch", "addStores", "clearDispatches", "search", "selectRow");
+var DevActions = alt.generateActions("addDispatch", "addStores", "clearDispatches", "search", "selectRow", "toggleLogDispatch");
 
 module.exports = DevActions;
 
@@ -30052,6 +30052,11 @@ var DispatcherView = (function (_React$Component) {
         DevActions.selectRow(rowData[2]);
       }
     },
+    toggleLogDispatch: {
+      value: function toggleLogDispatch() {
+        DevActions.toggleLogDispatch();
+      }
+    },
     render: {
       value: function render() {
         var _this = this;
@@ -30081,6 +30086,12 @@ var DispatcherView = (function (_React$Component) {
           ),
           " ",
           React.createElement("input", { type: "text", value: this.props.searchValue, onChange: this.doSearch }),
+          React.createElement(
+            "label",
+            null,
+            "Log Dispatches",
+            React.createElement("input", { type: "checkbox", checked: this.props.logDispatches, onClick: this.toggleLogDispatch })
+          ),
           React.createElement(
             "div",
             { className: "row" },
@@ -30320,11 +30331,13 @@ var DispatcherSearchStore = alt.createStore({
     addItem: DevActions.addDispatch,
     clearAll: DevActions.clearDispatches,
     search: DevActions.search,
-    select: DevActions.selectRow
+    select: DevActions.selectRow,
+    toggleLogDispatch: DevActions.toggleLogDispatch
   },
 
   state: {
     dispatches: [],
+    logDispatches: DispatcherStore.getState().logDispatches,
     searchValue: "",
     selectedPayload: {}
   },
@@ -30334,6 +30347,14 @@ var DispatcherSearchStore = alt.createStore({
   },
 
   addItem: function addItem() {
+    var _DispatcherStore$getState = DispatcherStore.getState();
+
+    var logDispatches = _DispatcherStore$getState.logDispatches;
+
+    if (!logDispatches) {
+      return false;
+    }
+
     return this.updateSearch(this.state.searchValue);
   },
 
@@ -30349,6 +30370,10 @@ var DispatcherSearchStore = alt.createStore({
 
   select: function select(payload) {
     this.state.selectedPayload = payload;
+  },
+
+  toggleLogDispatch: function toggleLogDispatch() {
+    this.state.logDispatches = DispatcherStore.getState().logDispatches;
   },
 
   updateSearch: function updateSearch(searchValue) {
@@ -30399,13 +30424,20 @@ var DispatcherStore = alt.createStore({
 
   bindListeners: {
     addItem: DevActions.addDispatch,
-    clearAll: DevActions.clearDispatches },
+    clearAll: DevActions.clearDispatches,
+    toggleLogDispatch: DevActions.toggleLogDispatch
+  },
 
   state: {
-    dispatches: []
+    dispatches: [],
+    logDispatches: true
   },
 
   addItem: function addItem(dispatch) {
+    if (!this.state.logDispatches) {
+      return false;
+    }
+
     var _StoresStore$getState = StoresStore.getState();
 
     var stores = _StoresStore$getState.stores;
@@ -30421,6 +30453,10 @@ var DispatcherStore = alt.createStore({
 
   clearAll: function clearAll() {
     this.state.dispatches = [];
+  },
+
+  toggleLogDispatch: function toggleLogDispatch() {
+    this.state.logDispatches = !this.state.logDispatches;
   }
 });
 

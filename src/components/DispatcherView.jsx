@@ -39,6 +39,10 @@ class DispatcherView extends React.Component {
     DevActions.selectRow(rowData[2])
   }
 
+  toggleLogDispatch() {
+    DevActions.toggleLogDispatch()
+  }
+
   render() {
 //    <i className="fa fa-dot-circle-o"></i> Record
 //    <i className="fa fa-pause"></i> Pause
@@ -61,6 +65,11 @@ class DispatcherView extends React.Component {
         </button>
         {' '}
         <input type="text" value={this.props.searchValue} onChange={this.doSearch} />
+
+        <label>
+          Log Dispatches
+          <input type="checkbox" checked={this.props.logDispatches} onClick={this.toggleLogDispatch} />
+        </label>
 
         <div className="row">
           <div className="col c6">
