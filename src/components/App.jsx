@@ -30,8 +30,17 @@ class App extends React.Component {
           </AltContainer>
         </Tabs.Panel>
         <Tabs.Panel title="Tools">
-          <div>
-            Take Snapshot
+          <div className="sp-lg txt-center">
+            <label>
+              <button className="btn btn-lg bg-blue">
+                Take Snapshot
+              </button>
+            </label>
+            <label>
+              <button className="btn btn-lg bg-red">
+                Flush
+              </button>
+            </label>
           </div>
         </Tabs.Panel>
       </Tabs>

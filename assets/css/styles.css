@@ -23,3 +23,8 @@ a {
   font-size: 0.8em;
   padding: 0 0.5em;
 }
+
+.btn.btn-lg {
+  margin: 1em 0;
+  width: 13em;
+}

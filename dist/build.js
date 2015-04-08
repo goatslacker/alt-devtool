@@ -29834,8 +29834,25 @@ var App = (function (_React$Component) {
             { title: "Tools" },
             React.createElement(
               "div",
-              null,
-              "Take Snapshot"
+              { className: "sp-lg txt-center" },
+              React.createElement(
+                "label",
+                null,
+                React.createElement(
+                  "button",
+                  { className: "btn btn-lg bg-blue" },
+                  "Take Snapshot"
+                )
+              ),
+              React.createElement(
+                "label",
+                null,
+                React.createElement(
+                  "button",
+                  { className: "btn btn-lg bg-red" },
+                  "Flush"
+                )
+              )
             )
           )
         );
