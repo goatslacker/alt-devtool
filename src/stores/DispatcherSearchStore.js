@@ -9,12 +9,14 @@ const DispatcherSearchStore = alt.createStore({
   bindListeners: {
     addItem: DevActions.addDispatch,
     clearAll: DevActions.clearDispatches,
-    search: DevActions.search
+    search: DevActions.search,
+    select: DevActions.selectRow
   },
 
   state: {
     dispatches: [],
-    searchValue: ''
+    searchValue: '',
+    selectedPayload: {}
   },
 
   beforeEach() {
@@ -25,13 +27,18 @@ const DispatcherSearchStore = alt.createStore({
     return this.updateSearch(this.state.searchValue)
   },
 
+  clearAll() {
+    this.state.dispatches = []
+    this.state.searchValue = ''
+    this.state.selectedPayload = {}
+  },
+
   search(searchValue) {
     return this.updateSearch(searchValue)
   },
 
-  clearAll() {
-    this.state.dispatches = []
-    this.state.searchValue = ''
+  select(payload) {
+    this.state.selectedPayload = payload
   },
 
   updateSearch(searchValue) {
@@ -44,11 +51,20 @@ const DispatcherSearchStore = alt.createStore({
       })
     }
 
+    const filteredDispatches = dispatches.filter((dispatch) => {
+      return stringScore(dispatch[0].replace('#', ''), searchValue) > .25
+    })
+
+    const selectedPayload = filteredDispatches.reduce((obj, dispatch) => {
+      return dispatch[2] === this.state.selectedPayload
+        ? dispatch[2]
+        : obj
+    }, {})
+
     return this.setState({
-      dispatches: dispatches.filter((dispatch) => {
-        return stringScore(dispatch[0].replace('#', ''), searchValue) > .25
-      }),
-      searchValue
+      dispatches: filteredDispatches,
+      searchValue,
+      selectedPayload
     })
   }
 })

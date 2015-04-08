@@ -4,7 +4,8 @@ const DevActions = alt.generateActions(
   'addDispatch',
   'addStores',
   'clearDispatches',
-  'search'
+  'search',
+  'selectRow'
 )
 
 export default DevActions

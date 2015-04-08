@@ -29756,7 +29756,7 @@ var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["defau
 
 var alt = _interopRequire(require("../flux/alt"));
 
-var DevActions = alt.generateActions("addDispatch", "addStores", "clearDispatches", "search");
+var DevActions = alt.generateActions("addDispatch", "addStores", "clearDispatches", "search", "selectRow");
 
 module.exports = DevActions;
 
@@ -30010,10 +30010,6 @@ var DispatcherView = (function (_React$Component) {
 
     _get(Object.getPrototypeOf(DispatcherView.prototype), "constructor", this).call(this);
 
-    this.doSearch = this._doSearch.bind(this);
-    this.clearDispatches = this._clearDispatches.bind(this);
-    this.selectRow = this._selectRow.bind(this);
-
     this.state = {
       height: 300,
       width: 600
@@ -30027,29 +30023,33 @@ var DispatcherView = (function (_React$Component) {
       value: function componentDidMount() {
         this.setState({
           height: window.innerHeight - 150,
-          payloadId: null,
           width: window.innerWidth / 2 - 40
         });
       }
     },
-    getPayload: {
-      value: function getPayload() {
-        return this.props.dispatches[this.state.payloadId] ? this.props.dispatches[this.state.payloadId][2] : {};
-      }
-    },
-    _clearDispatches: {
-      value: function _clearDispatches() {
+    clearDispatches: {
+      value: function clearDispatches() {
         DevActions.clearDispatches();
       }
     },
-    _doSearch: {
-      value: function _doSearch(ev) {
+    doSearch: {
+      value: function doSearch(ev) {
         DevActions.search(ev.target.value);
       }
     },
-    _selectRow: {
-      value: function _selectRow(ev, id, rowData) {
-        this.setState({ payloadId: id });
+    highlightColumn: {
+      value: function highlightColumn(x, id, data) {
+        var node = x || "N/A";
+        return data[2] === this.props.selectedPayload ? React.createElement(
+          "div",
+          { style: { background: "#70bde6" } },
+          node
+        ) : node;
+      }
+    },
+    selectRow: {
+      value: function selectRow(ev, id, rowData) {
+        DevActions.selectRow(rowData[2]);
       }
     },
     render: {
@@ -30075,7 +30075,7 @@ var DispatcherView = (function (_React$Component) {
           null,
           React.createElement(
             "button",
-            { className: "btn btn-sm", onClick: this.clearDispatches },
+            { className: "btn btn-sm bg-red", onClick: this.clearDispatches },
             React.createElement("i", { className: "fa fa-ban" }),
             " Clear Dispatches"
           ),
@@ -30101,11 +30101,13 @@ var DispatcherView = (function (_React$Component) {
                   width: this.state.width
                 },
                 React.createElement(Column, {
+                  cellRenderer: this.highlightColumn.bind(this),
                   dataKey: 0,
                   label: "Name",
                   width: this.state.width / 2
                 }),
                 React.createElement(Column, {
+                  cellRenderer: this.highlightColumn.bind(this),
                   dataKey: 1,
                   label: "Stores",
                   width: this.state.width / 2
@@ -30134,7 +30136,7 @@ var DispatcherView = (function (_React$Component) {
                 React.createElement(
                   "div",
                   { className: "public_fixedDataTableCell_main" },
-                  React.createElement(Data, { data: this.getPayload() })
+                  React.createElement(Data, { data: this.props.selectedPayload })
                 )
               )
             )
@@ -30317,12 +30319,14 @@ var DispatcherSearchStore = alt.createStore({
   bindListeners: {
     addItem: DevActions.addDispatch,
     clearAll: DevActions.clearDispatches,
-    search: DevActions.search
+    search: DevActions.search,
+    select: DevActions.selectRow
   },
 
   state: {
     dispatches: [],
-    searchValue: ""
+    searchValue: "",
+    selectedPayload: {}
   },
 
   beforeEach: function beforeEach() {
@@ -30333,16 +30337,23 @@ var DispatcherSearchStore = alt.createStore({
     return this.updateSearch(this.state.searchValue);
   },
 
+  clearAll: function clearAll() {
+    this.state.dispatches = [];
+    this.state.searchValue = "";
+    this.state.selectedPayload = {};
+  },
+
   search: function search(searchValue) {
     return this.updateSearch(searchValue);
   },
 
-  clearAll: function clearAll() {
-    this.state.dispatches = [];
-    this.state.searchValue = "";
+  select: function select(payload) {
+    this.state.selectedPayload = payload;
   },
 
   updateSearch: function updateSearch(searchValue) {
+    var _this = this;
+
     var _DispatcherStore$getState = DispatcherStore.getState();
 
     var dispatches = _DispatcherStore$getState.dispatches;
@@ -30354,11 +30365,18 @@ var DispatcherSearchStore = alt.createStore({
       });
     }
 
+    var filteredDispatches = dispatches.filter(function (dispatch) {
+      return stringScore(dispatch[0].replace("#", ""), searchValue) > 0.25;
+    });
+
+    var selectedPayload = filteredDispatches.reduce(function (obj, dispatch) {
+      return dispatch[2] === _this.state.selectedPayload ? dispatch[2] : obj;
+    }, {});
+
     return this.setState({
-      dispatches: dispatches.filter(function (dispatch) {
-        return stringScore(dispatch[0].replace("#", ""), searchValue) > 0.25;
-      }),
-      searchValue: searchValue
+      dispatches: filteredDispatches,
+      searchValue: searchValue,
+      selectedPayload: selectedPayload
     });
   }
 });
@@ -30381,14 +30399,10 @@ var DispatcherStore = alt.createStore({
 
   bindListeners: {
     addItem: DevActions.addDispatch,
-    clearAll: DevActions.clearDispatches
-  },
+    clearAll: DevActions.clearDispatches },
 
   state: {
-    dispatches: [] },
-
-  clearAll: function clearAll() {
-    this.state.dispatches = [];
+    dispatches: []
   },
 
   addItem: function addItem(dispatch) {
@@ -30403,6 +30417,10 @@ var DispatcherStore = alt.createStore({
     }).join(", ");
 
     this.state.dispatches.push([dispatch.action, dispatchedStores, dispatch.data]);
+  },
+
+  clearAll: function clearAll() {
+    this.state.dispatches = [];
   }
 });
 

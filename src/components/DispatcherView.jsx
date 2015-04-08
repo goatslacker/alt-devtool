@@ -7,10 +7,6 @@ class DispatcherView extends React.Component {
   constructor() {
     super()
 
-    this.doSearch = this._doSearch.bind(this)
-    this.clearDispatches = this._clearDispatches.bind(this)
-    this.selectRow = this._selectRow.bind(this)
-
     this.state = {
       height: 300,
       width: 600
@@ -20,27 +16,27 @@ class DispatcherView extends React.Component {
   componentDidMount() {
     this.setState({
       height: window.innerHeight - 150,
-      payloadId: null,
       width: window.innerWidth / 2 - 40
     })
   }
 
-  getPayload() {
-    return this.props.dispatches[this.state.payloadId]
-      ? this.props.dispatches[this.state.payloadId][2]
-      : {}
-  }
-
-  _clearDispatches() {
+  clearDispatches() {
     DevActions.clearDispatches()
   }
 
-  _doSearch(ev) {
+  doSearch(ev) {
     DevActions.search(ev.target.value)
   }
 
-  _selectRow(ev, id, rowData) {
-    this.setState({ payloadId: id })
+  highlightColumn(x, id, data) {
+    const node = x || 'N/A'
+    return data[2] === this.props.selectedPayload
+      ? <div style={{ background: '#70bde6' }}>{node}</div>
+      : node
+  }
+
+  selectRow(ev, id, rowData) {
+    DevActions.selectRow(rowData[2])
   }
 
   render() {
@@ -60,7 +56,7 @@ class DispatcherView extends React.Component {
     // I need a "payload" header
     return (
       <div>
-        <button className="btn btn-sm" onClick={this.clearDispatches}>
+        <button className="btn btn-sm bg-red" onClick={this.clearDispatches}>
           <i className="fa fa-ban"></i> Clear Dispatches
         </button>
         {' '}
@@ -78,11 +74,13 @@ class DispatcherView extends React.Component {
               width={this.state.width}
             >
               <Column
+                cellRenderer={this.highlightColumn.bind(this)}
                 dataKey={0}
                 label="Name"
                 width={this.state.width / 2}
               />
               <Column
+                cellRenderer={this.highlightColumn.bind(this)}
                 dataKey={1}
                 label="Stores"
                 width={this.state.width / 2}
@@ -93,11 +91,13 @@ class DispatcherView extends React.Component {
           <div className="public_fixedDataTable_main">
             <div className="public_fixedDataTable_header">
               <div className="public_fixedDataTableCell_main">
-                <div className="public_fixedDataTableCell_cellContent">Payload</div>
+                <div className="public_fixedDataTableCell_cellContent">
+                  Payload
+                </div>
               </div>
             </div>
             <div className="public_fixedDataTableCell_main">
-              <Data data={this.getPayload()} />
+              <Data data={this.props.selectedPayload} />
             </div>
             </div>
           </div>
