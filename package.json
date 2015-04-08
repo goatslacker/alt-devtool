@@ -5,6 +5,7 @@
   "main": "alt-panel.js",
   "scripts": {
     "build": "browserify -t babelify src -o dist/bundle.js",
+    "test": "browserify -t babelify src/test.js -o dist/test.js",
     "watch": "watchify -t babelify src -o dist/bundle.js"
   },
   "author": "Josh Perez <josh@goatslacker.com>",
