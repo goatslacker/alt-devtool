@@ -38,6 +38,7 @@ class StoresView extends React.Component {
           <i
             className="fa fa-recycle"
             onClick={() => this.recycleStore(store)}
+            title="Recycle store"
           />
         </div>
       </div>

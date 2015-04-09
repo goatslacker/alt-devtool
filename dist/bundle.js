@@ -29825,8 +29825,6 @@ var App = (function (_React$Component) {
       value: function render() {
         var _this = this;
 
-        // XXX revert to previous state of action?
-        //    <i className="fa fa-undo"></i> Undo
         return React.createElement(
           Tabs,
           null,
@@ -29836,7 +29834,7 @@ var App = (function (_React$Component) {
             React.createElement(
               AltContainer,
               { store: DispatcherSearchStore },
-              React.createElement(DispatcherView, null)
+              React.createElement(DispatcherView, { postMessage: this.postMessage.bind(this) })
             )
           ),
           React.createElement(
@@ -30099,10 +30097,47 @@ var DispatcherView = (function (_React$Component) {
         DevActions.search(ev.target.value);
       }
     },
+    renderName: {
+      value: function renderName(name, id, obj) {
+        var _this = this;
+
+        var node = React.createElement(
+          "div",
+          { className: "row" },
+          React.createElement(
+            "div",
+            { className: "col c11" },
+            name
+          ),
+          React.createElement(
+            "div",
+            { className: "col c1" },
+            React.createElement("i", {
+              className: "fa fa-undo",
+              onClick: function () {
+                return _this.revertTo(obj.id);
+              },
+              title: "Revert to this point in time"
+            })
+          )
+        );
+
+        return this.highlightColumn(node, obj);
+      }
+    },
+    renderStores: {
+      value: function renderStores(stores, id, obj) {
+        return this.highlightColumn(stores || "N/A", obj);
+      }
+    },
+    revertTo: {
+      value: function revertTo(id) {
+        this.props.postMessage("REVERT", { id: id });
+      }
+    },
     highlightColumn: {
-      value: function highlightColumn(x, id, data) {
-        var node = x || "N/A";
-        return data[2] === this.props.selectedPayload ? React.createElement(
+      value: function highlightColumn(node, obj) {
+        return obj.data === this.props.selectedPayload ? React.createElement(
           "div",
           { style: { background: "#70bde6" } },
           node
@@ -30111,7 +30146,7 @@ var DispatcherView = (function (_React$Component) {
     },
     selectRow: {
       value: function selectRow(ev, id, rowData) {
-        DevActions.selectRow(rowData[2]);
+        DevActions.selectRow(rowData.data);
       }
     },
     toggleLogDispatch: {
@@ -30182,14 +30217,14 @@ var DispatcherView = (function (_React$Component) {
                   width: this.state.width
                 },
                 React.createElement(Column, {
-                  cellRenderer: this.highlightColumn.bind(this),
-                  dataKey: 0,
+                  cellRenderer: this.renderName.bind(this),
+                  dataKey: "action",
                   label: "Name",
                   width: this.state.width / 2
                 }),
                 React.createElement(Column, {
-                  cellRenderer: this.highlightColumn.bind(this),
-                  dataKey: 1,
+                  cellRenderer: this.renderStores.bind(this),
+                  dataKey: "stores",
                   label: "Stores",
                   width: this.state.width / 2
                 })
@@ -30430,7 +30465,8 @@ var StoresView = (function (_React$Component) {
               className: "fa fa-recycle",
               onClick: function () {
                 return _this.recycleStore(store);
-              }
+              },
+              title: "Recycle store"
             })
           )
         );
@@ -30591,11 +30627,11 @@ var DispatcherSearchStore = alt.createStore({
     }
 
     var filteredDispatches = dispatches.filter(function (dispatch) {
-      return stringScore(dispatch[0].replace("#", ""), searchValue) > 0.25;
+      return stringScore(dispatch.action.replace("#", ""), searchValue) > 0.25;
     });
 
     var selectedPayload = filteredDispatches.reduce(function (obj, dispatch) {
-      return dispatch[2] === _this.state.selectedPayload ? dispatch[2] : obj;
+      return dispatch.data === _this.state.selectedPayload ? dispatch.data : obj;
     }, {});
 
     return this.setState({
@@ -30648,7 +30684,9 @@ var DispatcherStore = alt.createStore({
       return x.name;
     }).join(", ");
 
-    this.state.dispatches.push([dispatch.action, dispatchedStores, dispatch.data]);
+    this.state.dispatches.push(Object.assign({
+      stores: dispatchedStores
+    }, dispatch));
   },
 
   clearAll: function clearAll() {

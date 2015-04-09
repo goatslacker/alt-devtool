@@ -1,7 +1,12 @@
 (function () {
   const TIMEOUT = 10000
   const ALT = 'goatslacker.github.io/alt/'
+  const snapshots = {}
   poke(100)
+
+  function uid() {
+    return (Date.now() * Math.random()).toString(35).substr(0, 7)
+  }
 
   function poke(time) {
     if (time > TIMEOUT) {
@@ -19,7 +24,7 @@
 
   function parseStores() {
     return Object.keys(window[ALT].stores).map(function (storeName) {
-      var store = window[ALT].stores[storeName]
+      const store = window[ALT].stores[storeName]
       return {
         name: storeName,
         state: JSON.stringify(store.getState()),
@@ -30,23 +35,26 @@
   }
 
   function register() {
-    // XXX if stores change within a dispatch, dispatch new stores...
-    var cachedStores = []
+    post('STORES', {
+      stores: parseStores()
+    })
 
-    // XXX it would be great if I could capture the stack trace of where these actions are triggered
-    window[ALT].dispatcher.register(function (payload) {
+    const finalStore = makeFinalStore(window[ALT])
+
+    finalStore.getEventEmitter().on('dispatch', function (payload) {
+      const id = uid()
+
       post('STORES', {
         stores: parseStores()
       })
 
       post('DISPATCH', {
+        id: id,
         action: Symbol.keyFor(payload.action),
         data: payload.data
       })
-    })
 
-    post('STORES', {
-      stores: parseStores()
+      snapshots[id] = window[ALT].takeSnapshot()
     })
   }
 
@@ -58,13 +66,28 @@
     }, '*')
   }
 
+  function FinalStore() {
+    this.dispatcher.register(function (payload) {
+      const stores = Object.keys(this.alt.stores).reduce(function (arr, store) {
+        return arr.push(this.alt.stores[store].dispatchToken), arr
+      }.bind(this), [])
+
+      this.waitFor(stores)
+      this.getInstance().getEventEmitter().emit('dispatch', payload)
+    }.bind(this))
+  }
+
+  function makeFinalStore(alt) {
+    return alt.createStore(FinalStore, 'AltFinalStore', false)
+  }
+
   // handle messages from the hook
   function onMessageFromHook(event) {
     if (event && event.source !== window) {
       return;
     }
 
-    var message = event.data;
+    const message = event.data;
 
 //    console.log('%%%%%%%%%%%%%%', event, message);
 
@@ -89,6 +112,11 @@
         post('STORES', {
           stores: parseStores()
         })
+      return
+      case 'REVERT':
+        if (snapshots[message.payload.data.id]) {
+          window[ALT].bootstrap(snapshots[message.payload.data.id])
+        }
       return
       case 'START_RECORDING':
       case 'CLEAR_RECORDING':

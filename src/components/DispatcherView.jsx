@@ -31,15 +31,41 @@ class DispatcherView extends React.Component {
     DevActions.search(ev.target.value)
   }
 
-  highlightColumn(x, id, data) {
-    const node = x || 'N/A'
-    return data[2] === this.props.selectedPayload
+  renderName(name, id, obj) {
+    const node = (
+      <div className="row">
+        <div className="col c11">
+          {name}
+        </div>
+        <div className="col c1">
+          <i
+            className="fa fa-undo"
+            onClick={() => this.revertTo(obj.id)}
+            title="Revert to this point in time"
+          />
+        </div>
+      </div>
+    )
+
+    return this.highlightColumn(node, obj)
+  }
+
+  renderStores(stores, id, obj) {
+    return this.highlightColumn(stores || 'N/A', obj)
+  }
+
+  revertTo(id) {
+    this.props.postMessage('REVERT', { id })
+  }
+
+  highlightColumn(node, obj) {
+    return obj.data === this.props.selectedPayload
       ? <div style={{ background: '#70bde6' }}>{node}</div>
       : node
   }
 
   selectRow(ev, id, rowData) {
-    DevActions.selectRow(rowData[2])
+    DevActions.selectRow(rowData.data)
   }
 
   toggleLogDispatch() {
@@ -92,14 +118,14 @@ class DispatcherView extends React.Component {
               width={this.state.width}
             >
               <Column
-                cellRenderer={this.highlightColumn.bind(this)}
-                dataKey={0}
+                cellRenderer={this.renderName.bind(this)}
+                dataKey="action"
                 label="Name"
                 width={this.state.width / 2}
               />
               <Column
-                cellRenderer={this.highlightColumn.bind(this)}
-                dataKey={1}
+                cellRenderer={this.renderStores.bind(this)}
+                dataKey="stores"
                 label="Stores"
                 width={this.state.width / 2}
               />

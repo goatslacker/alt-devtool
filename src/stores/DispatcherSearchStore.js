@@ -64,12 +64,12 @@ const DispatcherSearchStore = alt.createStore({
     }
 
     const filteredDispatches = dispatches.filter((dispatch) => {
-      return stringScore(dispatch[0].replace('#', ''), searchValue) > .25
+      return stringScore(dispatch.action.replace('#', ''), searchValue) > .25
     })
 
     const selectedPayload = filteredDispatches.reduce((obj, dispatch) => {
-      return dispatch[2] === this.state.selectedPayload
-        ? dispatch[2]
+      return dispatch.data === this.state.selectedPayload
+        ? dispatch.data
         : obj
     }, {})
 

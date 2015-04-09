@@ -23,13 +23,11 @@ class App extends React.Component {
   }
 
   render() {
-    // XXX revert to previous state of action?
-    //    <i className="fa fa-undo"></i> Undo
     return (
       <Tabs>
         <Tabs.Panel title="Dispatches">
           <AltContainer store={DispatcherSearchStore}>
-            <DispatcherView />
+            <DispatcherView postMessage={this.postMessage.bind(this)} />
           </AltContainer>
         </Tabs.Panel>
         <Tabs.Panel title="Stores">

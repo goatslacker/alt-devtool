@@ -1,7 +1,7 @@
 //window.addEventListener('beforeunload', onUnload);
 window.addEventListener('message', onMessageFromPage);
 
-var script = document.createElement('script');
+const script = document.createElement('script');
 script.type = 'text/javascript';
 script.src = chrome.extension.getURL('scripts/altInterface.js');
 script.onload = function () {
@@ -20,7 +20,7 @@ function onMessageFromPage(event) {
     return;
   }
 
-  var message = event.data;
+  const message = event.data;
 
 //  console.log('@@@@@@@@@@@@', event, message);
 
@@ -34,7 +34,7 @@ function onMessageFromPage(event) {
 }
 
 // Communicate with the alt interface
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 //  console.log('WHAT THE RFUCK')
 //  console.log(request)
   window.postMessage({
