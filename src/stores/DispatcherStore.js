@@ -28,7 +28,7 @@ const DispatcherStore = alt.createStore({
       .map((x) => x.name)
       .join(', ')
 
-    this.state.dispatches.push(Object.assign({
+    this.state.dispatches.unshift(Object.assign({
       stores: dispatchedStores
     }, dispatch))
   },

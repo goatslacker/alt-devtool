@@ -30693,7 +30693,7 @@ var DispatcherStore = alt.createStore({
       return x.name;
     }).join(", ");
 
-    this.state.dispatches.push(Object.assign({
+    this.state.dispatches.unshift(Object.assign({
       stores: dispatchedStores
     }, dispatch));
   },
