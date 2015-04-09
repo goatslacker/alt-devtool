@@ -9,6 +9,7 @@ const DispatcherSearchStore = alt.createStore({
   bindListeners: {
     addItem: DevActions.addDispatch,
     clearAll: DevActions.clearDispatches,
+    revert: DevActions.revert,
     search: DevActions.search,
     select: DevActions.selectRow,
     toggleLogDispatch: DevActions.toggleLogDispatch
@@ -17,6 +18,7 @@ const DispatcherSearchStore = alt.createStore({
   state: {
     dispatches: [],
     logDispatches: DispatcherStore.getState().logDispatches,
+    revertId: null,
     searchValue: '',
     selectedPayload: {}
   },
@@ -39,6 +41,10 @@ const DispatcherSearchStore = alt.createStore({
     this.state.dispatches = []
     this.state.searchValue = ''
     this.state.selectedPayload = {}
+  },
+
+  revert(id) {
+    this.state.revertId = id
   },
 
   search(searchValue) {

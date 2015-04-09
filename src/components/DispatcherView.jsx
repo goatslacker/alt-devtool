@@ -32,6 +32,10 @@ class DispatcherView extends React.Component {
   }
 
   renderName(name, id, obj) {
+    const icon = obj.id === this.props.revertId
+      ? 'fa-check'
+      : 'fa-undo'
+
     const node = (
       <div className="row">
         <div className="col c11">
@@ -39,7 +43,7 @@ class DispatcherView extends React.Component {
         </div>
         <div className="col c1">
           <i
-            className="fa fa-undo"
+            className={`fa ${icon}`}
             onClick={() => this.revertTo(obj.id)}
             title="Revert to this point in time"
           />
@@ -55,6 +59,7 @@ class DispatcherView extends React.Component {
   }
 
   revertTo(id) {
+    DevActions.revert(id)
     this.props.postMessage('REVERT', { id })
   }
 

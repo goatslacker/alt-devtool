@@ -29762,7 +29762,7 @@ var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["defau
 
 var alt = _interopRequire(require("../flux/alt"));
 
-var DevActions = alt.generateActions("addDispatch", "addStores", "clearDispatches", "search", "selectRow", "selectStore", "toggleLogDispatch");
+var DevActions = alt.generateActions("addDispatch", "addStores", "clearDispatches", "revert", "search", "selectRow", "selectStore", "toggleLogDispatch");
 
 module.exports = DevActions;
 
@@ -30101,6 +30101,8 @@ var DispatcherView = (function (_React$Component) {
       value: function renderName(name, id, obj) {
         var _this = this;
 
+        var icon = obj.id === this.props.revertId ? "fa-check" : "fa-undo";
+
         var node = React.createElement(
           "div",
           { className: "row" },
@@ -30113,7 +30115,7 @@ var DispatcherView = (function (_React$Component) {
             "div",
             { className: "col c1" },
             React.createElement("i", {
-              className: "fa fa-undo",
+              className: "fa " + icon,
               onClick: function () {
                 return _this.revertTo(obj.id);
               },
@@ -30132,6 +30134,7 @@ var DispatcherView = (function (_React$Component) {
     },
     revertTo: {
       value: function revertTo(id) {
+        DevActions.revert(id);
         this.props.postMessage("REVERT", { id: id });
       }
     },
@@ -30566,6 +30569,7 @@ var DispatcherSearchStore = alt.createStore({
   bindListeners: {
     addItem: DevActions.addDispatch,
     clearAll: DevActions.clearDispatches,
+    revert: DevActions.revert,
     search: DevActions.search,
     select: DevActions.selectRow,
     toggleLogDispatch: DevActions.toggleLogDispatch
@@ -30574,6 +30578,7 @@ var DispatcherSearchStore = alt.createStore({
   state: {
     dispatches: [],
     logDispatches: DispatcherStore.getState().logDispatches,
+    revertId: null,
     searchValue: "",
     selectedPayload: {}
   },
@@ -30598,6 +30603,10 @@ var DispatcherSearchStore = alt.createStore({
     this.state.dispatches = [];
     this.state.searchValue = "";
     this.state.selectedPayload = {};
+  },
+
+  revert: function revert(id) {
+    this.state.revertId = id;
   },
 
   search: function search(searchValue) {
