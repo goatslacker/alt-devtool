@@ -3,29 +3,27 @@ import DispatcherStore from './DispatcherStore'
 import alt from '../flux/alt'
 import stringScore from '../utils/stringScore'
 
-const DispatcherSearchStore = alt.createStore({
-  displayName: 'DispatcherSearchStore',
+class DispatcherSearchStore {
+  constructor() {
+    this.dispatches = []
+    this.logDispatches = DispatcherStore.getState().logDispatches
+    this.revertId = null
+    this.searchValue = ''
+    this.selectedPayload = {}
 
-  bindListeners: {
-    addItem: DevActions.addDispatch,
-    clearAll: DevActions.clearDispatches,
-    revert: DevActions.revert,
-    search: DevActions.search,
-    select: DevActions.selectRow,
-    toggleLogDispatch: DevActions.toggleLogDispatch
-  },
-
-  state: {
-    dispatches: [],
-    logDispatches: DispatcherStore.getState().logDispatches,
-    revertId: null,
-    searchValue: '',
-    selectedPayload: {}
-  },
+    this.bindListeners({
+      addItem: DevActions.addDispatch,
+      clearAll: DevActions.clearDispatches,
+      revert: DevActions.revert,
+      search: DevActions.search,
+      select: DevActions.selectRow,
+      toggleLogDispatch: DevActions.toggleLogDispatch
+    })
+  }
 
   beforeEach() {
     this.waitFor(DispatcherStore)
-  },
+  }
 
   addItem() {
     const { logDispatches } = DispatcherStore.getState()
@@ -34,30 +32,30 @@ const DispatcherSearchStore = alt.createStore({
       return false
     }
 
-    return this.updateSearch(this.state.searchValue)
-  },
+    return this.updateSearch(this.searchValue)
+  }
 
   clearAll() {
-    this.state.dispatches = []
-    this.state.searchValue = ''
-    this.state.selectedPayload = {}
-  },
+    this.dispatches = []
+    this.searchValue = ''
+    this.selectedPayload = {}
+  }
 
   revert(id) {
-    this.state.revertId = id
-  },
+    this.revertId = id
+  }
 
   search(searchValue) {
     return this.updateSearch(searchValue)
-  },
+  }
 
   select(payload) {
-    this.state.selectedPayload = payload
-  },
+    this.selectedPayload = payload
+  }
 
   toggleLogDispatch() {
-    this.state.logDispatches = DispatcherStore.getState().logDispatches
-  },
+    this.logDispatches = DispatcherStore.getState().logDispatches
+  }
 
   updateSearch(searchValue) {
     const { dispatches } = DispatcherStore.getState()
@@ -74,7 +72,7 @@ const DispatcherSearchStore = alt.createStore({
     })
 
     const selectedPayload = filteredDispatches.reduce((obj, dispatch) => {
-      return dispatch.data === this.state.selectedPayload
+      return dispatch.data === this.selectedPayload
         ? dispatch.data
         : obj
     }, {})
@@ -85,6 +83,6 @@ const DispatcherSearchStore = alt.createStore({
       selectedPayload
     })
   }
-})
+}
 
-export default DispatcherSearchStore
+export default alt.createStore(DispatcherSearchStore, 'DispatcherSearchStore')

@@ -30555,6 +30555,10 @@ module.exports = new Alt();
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 
+var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
 var DevActions = _interopRequire(require("../actions/DevActions"));
 
 var DispatcherStore = _interopRequire(require("./DispatcherStore"));
@@ -30563,100 +30567,117 @@ var alt = _interopRequire(require("../flux/alt"));
 
 var stringScore = _interopRequire(require("../utils/stringScore"));
 
-var DispatcherSearchStore = alt.createStore({
-  displayName: "DispatcherSearchStore",
+var DispatcherSearchStore = (function () {
+  function DispatcherSearchStore() {
+    _classCallCheck(this, DispatcherSearchStore);
 
-  bindListeners: {
-    addItem: DevActions.addDispatch,
-    clearAll: DevActions.clearDispatches,
-    revert: DevActions.revert,
-    search: DevActions.search,
-    select: DevActions.selectRow,
-    toggleLogDispatch: DevActions.toggleLogDispatch
-  },
+    this.dispatches = [];
+    this.logDispatches = DispatcherStore.getState().logDispatches;
+    this.revertId = null;
+    this.searchValue = "";
+    this.selectedPayload = {};
 
-  state: {
-    dispatches: [],
-    logDispatches: DispatcherStore.getState().logDispatches,
-    revertId: null,
-    searchValue: "",
-    selectedPayload: {}
-  },
-
-  beforeEach: function beforeEach() {
-    this.waitFor(DispatcherStore);
-  },
-
-  addItem: function addItem() {
-    var _DispatcherStore$getState = DispatcherStore.getState();
-
-    var logDispatches = _DispatcherStore$getState.logDispatches;
-
-    if (!logDispatches) {
-      return false;
-    }
-
-    return this.updateSearch(this.state.searchValue);
-  },
-
-  clearAll: function clearAll() {
-    this.state.dispatches = [];
-    this.state.searchValue = "";
-    this.state.selectedPayload = {};
-  },
-
-  revert: function revert(id) {
-    this.state.revertId = id;
-  },
-
-  search: function search(searchValue) {
-    return this.updateSearch(searchValue);
-  },
-
-  select: function select(payload) {
-    this.state.selectedPayload = payload;
-  },
-
-  toggleLogDispatch: function toggleLogDispatch() {
-    this.state.logDispatches = DispatcherStore.getState().logDispatches;
-  },
-
-  updateSearch: function updateSearch(searchValue) {
-    var _this = this;
-
-    var _DispatcherStore$getState = DispatcherStore.getState();
-
-    var dispatches = _DispatcherStore$getState.dispatches;
-
-    if (!searchValue.trim()) {
-      return this.setState({
-        dispatches: dispatches,
-        searchValue: searchValue
-      });
-    }
-
-    var filteredDispatches = dispatches.filter(function (dispatch) {
-      return stringScore(dispatch.action.replace("#", ""), searchValue) > 0.25;
-    });
-
-    var selectedPayload = filteredDispatches.reduce(function (obj, dispatch) {
-      return dispatch.data === _this.state.selectedPayload ? dispatch.data : obj;
-    }, {});
-
-    return this.setState({
-      dispatches: filteredDispatches,
-      searchValue: searchValue,
-      selectedPayload: selectedPayload
+    this.bindListeners({
+      addItem: DevActions.addDispatch,
+      clearAll: DevActions.clearDispatches,
+      revert: DevActions.revert,
+      search: DevActions.search,
+      select: DevActions.selectRow,
+      toggleLogDispatch: DevActions.toggleLogDispatch
     });
   }
-});
 
-module.exports = DispatcherSearchStore;
+  _createClass(DispatcherSearchStore, {
+    beforeEach: {
+      value: function beforeEach() {
+        this.waitFor(DispatcherStore);
+      }
+    },
+    addItem: {
+      value: function addItem() {
+        var _DispatcherStore$getState = DispatcherStore.getState();
+
+        var logDispatches = _DispatcherStore$getState.logDispatches;
+
+        if (!logDispatches) {
+          return false;
+        }
+
+        return this.updateSearch(this.searchValue);
+      }
+    },
+    clearAll: {
+      value: function clearAll() {
+        this.dispatches = [];
+        this.searchValue = "";
+        this.selectedPayload = {};
+      }
+    },
+    revert: {
+      value: function revert(id) {
+        this.revertId = id;
+      }
+    },
+    search: {
+      value: function search(searchValue) {
+        return this.updateSearch(searchValue);
+      }
+    },
+    select: {
+      value: function select(payload) {
+        this.selectedPayload = payload;
+      }
+    },
+    toggleLogDispatch: {
+      value: function toggleLogDispatch() {
+        this.logDispatches = DispatcherStore.getState().logDispatches;
+      }
+    },
+    updateSearch: {
+      value: function updateSearch(searchValue) {
+        var _this = this;
+
+        var _DispatcherStore$getState = DispatcherStore.getState();
+
+        var dispatches = _DispatcherStore$getState.dispatches;
+
+        if (!searchValue.trim()) {
+          return this.setState({
+            dispatches: dispatches,
+            searchValue: searchValue
+          });
+        }
+
+        var filteredDispatches = dispatches.filter(function (dispatch) {
+          return stringScore(dispatch.action.replace("#", ""), searchValue) > 0.25;
+        });
+
+        var selectedPayload = filteredDispatches.reduce(function (obj, dispatch) {
+          return dispatch.data === _this.selectedPayload ? dispatch.data : obj;
+        }, {});
+
+        return this.setState({
+          dispatches: filteredDispatches,
+          searchValue: searchValue,
+          selectedPayload: selectedPayload
+        });
+      }
+    }
+  });
+
+  return DispatcherSearchStore;
+})();
+
+module.exports = alt.createStore(DispatcherSearchStore, "DispatcherSearchStore");
 
 },{"../actions/DevActions":236,"../flux/alt":243,"../utils/stringScore":247,"./DispatcherStore":245}],245:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+
+var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
 var DevActions = _interopRequire(require("../actions/DevActions"));
 
@@ -30664,88 +30685,107 @@ var StoresStore = _interopRequire(require("./StoresStore"));
 
 var alt = _interopRequire(require("../flux/alt"));
 
-var DispatcherStore = alt.createStore({
-  displayName: "DispatcherStore",
+var DispatcherStore = (function () {
+  function DispatcherStore() {
+    _classCallCheck(this, DispatcherStore);
 
-  bindListeners: {
-    addItem: DevActions.addDispatch,
-    clearAll: DevActions.clearDispatches,
-    toggleLogDispatch: DevActions.toggleLogDispatch
-  },
+    this.dispatches = [];
+    this.logDispatches = true;
 
-  state: {
-    dispatches: [],
-    logDispatches: true
-  },
-
-  addItem: function addItem(dispatch) {
-    if (!this.state.logDispatches) {
-      return false;
-    }
-
-    var _StoresStore$getState = StoresStore.getState();
-
-    var stores = _StoresStore$getState.stores;
-
-    var dispatchedStores = stores.filter(function (x) {
-      return x.listeners.indexOf(dispatch.action) > -1;
-    }).map(function (x) {
-      return x.name;
-    }).join(", ");
-
-    this.state.dispatches.unshift(Object.assign({
-      stores: dispatchedStores
-    }, dispatch));
-  },
-
-  clearAll: function clearAll() {
-    this.state.dispatches = [];
-  },
-
-  toggleLogDispatch: function toggleLogDispatch() {
-    this.state.logDispatches = !this.state.logDispatches;
+    this.bindListeners({
+      addItem: DevActions.addDispatch,
+      clearAll: DevActions.clearDispatches,
+      toggleLogDispatch: DevActions.toggleLogDispatch
+    });
   }
-});
 
-module.exports = DispatcherStore;
+  _createClass(DispatcherStore, {
+    addItem: {
+      value: function addItem(dispatch) {
+        if (!this.logDispatches) {
+          return false;
+        }
+
+        var _StoresStore$getState = StoresStore.getState();
+
+        var stores = _StoresStore$getState.stores;
+
+        var dispatchedStores = stores.filter(function (x) {
+          return x.listeners.indexOf(dispatch.action) > -1;
+        }).map(function (x) {
+          return x.name;
+        }).join(", ");
+
+        this.dispatches.unshift(Object.assign({
+          stores: dispatchedStores
+        }, dispatch));
+      }
+    },
+    clearAll: {
+      value: function clearAll() {
+        this.dispatches = [];
+      }
+    },
+    toggleLogDispatch: {
+      value: function toggleLogDispatch() {
+        this.logDispatches = !this.logDispatches;
+      }
+    }
+  });
+
+  return DispatcherStore;
+})();
+
+module.exports = alt.createStore(DispatcherStore, "DispatcherStore");
 
 },{"../actions/DevActions":236,"../flux/alt":243,"./StoresStore":246}],246:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 
+var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
 var DevActions = _interopRequire(require("../actions/DevActions"));
 
 var alt = _interopRequire(require("../flux/alt"));
 
-var StoresStore = alt.createStore({
-  displayName: "StoresStore",
+var StoresStore = (function () {
+  function StoresStore() {
+    _classCallCheck(this, StoresStore);
 
-  bindListeners: {
-    addStores: DevActions.addStores,
-    selectStore: DevActions.selectStore
-  },
+    this.selectedStore = null;
+    this.stores = [];
 
-  state: {
-    selectedStore: null,
-    stores: []
-  },
-
-  addStores: function addStores(stores) {
-    var selectedStore = this.state.selectedStore === null ? this.state.stores.length ? 0 : null : this.state.selectedStore;
-
-    return this.setState({
-      selectedStore: selectedStore,
-      stores: stores
+    this.bindListeners({
+      addStores: DevActions.addStores,
+      selectStore: DevActions.selectStore
     });
-  },
-
-  selectStore: function selectStore(id) {
-    this.state.selectedStore = id;
   }
-});
 
-module.exports = StoresStore;
+  _createClass(StoresStore, {
+    addStores: {
+      value: function addStores(stores) {
+        var selectedStore = this.selectedStore === null ? this.stores.length ? 0 : null : this.selectedStore;
+
+        return this.setState({
+          selectedStore: selectedStore,
+          stores: stores
+        });
+      }
+    },
+    selectStore: {
+      value: function selectStore(id) {
+        this.selectedStore = id;
+      }
+    }
+  });
+
+  return StoresStore;
+})();
+
+module.exports = alt.createStore(StoresStore, "StoresStore");
 
 },{"../actions/DevActions":236,"../flux/alt":243}],247:[function(require,module,exports){
 /*!

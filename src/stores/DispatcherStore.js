@@ -2,22 +2,20 @@ import DevActions from '../actions/DevActions'
 import StoresStore from './StoresStore'
 import alt from '../flux/alt'
 
-const DispatcherStore = alt.createStore({
-  displayName: 'DispatcherStore',
+class DispatcherStore {
+  constructor() {
+    this.dispatches = []
+    this.logDispatches = true
 
-  bindListeners: {
-    addItem: DevActions.addDispatch,
-    clearAll: DevActions.clearDispatches,
-    toggleLogDispatch: DevActions.toggleLogDispatch
-  },
-
-  state: {
-    dispatches: [],
-    logDispatches: true
-  },
+    this.bindListeners({
+      addItem: DevActions.addDispatch,
+      clearAll: DevActions.clearDispatches,
+      toggleLogDispatch: DevActions.toggleLogDispatch
+    })
+  }
 
   addItem(dispatch) {
-    if (!this.state.logDispatches) {
+    if (!this.logDispatches) {
       return false
     }
 
@@ -28,18 +26,18 @@ const DispatcherStore = alt.createStore({
       .map((x) => x.name)
       .join(', ')
 
-    this.state.dispatches.unshift(Object.assign({
+    this.dispatches.unshift(Object.assign({
       stores: dispatchedStores
     }, dispatch))
-  },
+  }
 
   clearAll() {
-    this.state.dispatches = []
-  },
+    this.dispatches = []
+  }
 
   toggleLogDispatch() {
-    this.state.logDispatches = !this.state.logDispatches
+    this.logDispatches = !this.logDispatches
   }
-})
+}
 
-export default DispatcherStore
+export default alt.createStore(DispatcherStore, 'DispatcherStore')
