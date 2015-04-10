@@ -89,8 +89,6 @@
 
     const message = event.data;
 
-//    console.log('%%%%%%%%%%%%%%', event, message);
-
     if (typeof message !== 'object' || message === null || message.source !== 'alt-hook') {
       return;
     }
