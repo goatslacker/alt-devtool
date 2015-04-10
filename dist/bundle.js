@@ -29762,7 +29762,7 @@ var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["defau
 
 var alt = _interopRequire(require("../flux/alt"));
 
-var DevActions = alt.generateActions("addDispatch", "addStores", "clearDispatches", "revert", "search", "selectRow", "selectStore", "toggleLogDispatch");
+var DevActions = alt.generateActions("addDispatch", "addStores", "clearAll", "clearDispatches", "revert", "search", "selectRow", "selectStore", "toggleLogDispatch");
 
 module.exports = DevActions;
 
@@ -30579,7 +30579,8 @@ var DispatcherSearchStore = (function () {
 
     this.bindListeners({
       addItem: DevActions.addDispatch,
-      clearAll: DevActions.clearDispatches,
+      clearAll: DevActions.clearAll,
+      clearDispatches: DevActions.clearDispatches,
       revert: DevActions.revert,
       search: DevActions.search,
       select: DevActions.selectRow,
@@ -30611,6 +30612,11 @@ var DispatcherSearchStore = (function () {
         this.dispatches = [];
         this.searchValue = "";
         this.selectedPayload = {};
+      }
+    },
+    clearDispatches: {
+      value: function clearDispatches() {
+        this.clearAll();
       }
     },
     revert: {
@@ -30694,7 +30700,8 @@ var DispatcherStore = (function () {
 
     this.bindListeners({
       addItem: DevActions.addDispatch,
-      clearAll: DevActions.clearDispatches,
+      clearAll: DevActions.clearAll,
+      clearDispatches: DevActions.clearDispatches,
       toggleLogDispatch: DevActions.toggleLogDispatch
     });
   }
@@ -30724,6 +30731,11 @@ var DispatcherStore = (function () {
     clearAll: {
       value: function clearAll() {
         this.dispatches = [];
+      }
+    },
+    clearDispatches: {
+      value: function clearDispatches() {
+        this.clearAll();
       }
     },
     toggleLogDispatch: {
@@ -30760,6 +30772,7 @@ var StoresStore = (function () {
 
     this.bindListeners({
       addStores: DevActions.addStores,
+      clearAll: DevActions.clearAll,
       selectStore: DevActions.selectStore
     });
   }
@@ -30773,6 +30786,12 @@ var StoresStore = (function () {
           selectedStore: selectedStore,
           stores: stores
         });
+      }
+    },
+    clearAll: {
+      value: function clearAll() {
+        this.selectedStore = null;
+        this.stores = [];
       }
     },
     selectStore: {
@@ -30940,6 +30959,8 @@ backgroundPageConnection.onMessage.addListener(function (message) {
       return DevActions.addDispatch(message.payload);
     case "STORES":
       return DevActions.addStores(message.payload.stores);
+    case "PAGE_UNLOADED":
+      return DevActions.clearAll();
     default:
       console.log("Unknown type " + message.type);
   }

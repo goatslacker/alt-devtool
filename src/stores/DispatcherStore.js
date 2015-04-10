@@ -9,7 +9,8 @@ class DispatcherStore {
 
     this.bindListeners({
       addItem: DevActions.addDispatch,
-      clearAll: DevActions.clearDispatches,
+      clearAll: DevActions.clearAll,
+      clearDispatches: DevActions.clearDispatches,
       toggleLogDispatch: DevActions.toggleLogDispatch
     })
   }
@@ -33,6 +34,10 @@ class DispatcherStore {
 
   clearAll() {
     this.dispatches = []
+  }
+
+  clearDispatches() {
+    this.clearAll()
   }
 
   toggleLogDispatch() {

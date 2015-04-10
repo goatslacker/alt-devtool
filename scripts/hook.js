@@ -1,4 +1,4 @@
-//window.addEventListener('beforeunload', onUnload);
+window.addEventListener('beforeunload', onUnload)
 window.addEventListener('message', onMessageFromPage)
 
 const script = document.createElement('script')
@@ -9,12 +9,13 @@ script.onload = function () {
 }
 document.documentElement.appendChild(script)
 
-//function onUnload() {
-//  chrome.runtime.sendMessage({
-//    type: 'PAGE_UNLOADED'
-//  });
-//}
+function onUnload() {
+  chrome.runtime.sendMessage({
+    type: 'PAGE_UNLOADED'
+  })
+}
 
+// Communicate with the devtool
 function onMessageFromPage(event) {
   if (event && event.source !== window) {
     return
@@ -29,7 +30,7 @@ function onMessageFromPage(event) {
   chrome.runtime.sendMessage(message)
 }
 
-// Communicate with the alt interface
+// Communicate with the alt interface from the devtool
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   window.postMessage({
     payload: request,

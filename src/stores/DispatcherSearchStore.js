@@ -13,7 +13,8 @@ class DispatcherSearchStore {
 
     this.bindListeners({
       addItem: DevActions.addDispatch,
-      clearAll: DevActions.clearDispatches,
+      clearAll: DevActions.clearAll,
+      clearDispatches: DevActions.clearDispatches,
       revert: DevActions.revert,
       search: DevActions.search,
       select: DevActions.selectRow,
@@ -39,6 +40,10 @@ class DispatcherSearchStore {
     this.dispatches = []
     this.searchValue = ''
     this.selectedPayload = {}
+  }
+
+  clearDispatches() {
+    this.clearAll()
   }
 
   revert(id) {

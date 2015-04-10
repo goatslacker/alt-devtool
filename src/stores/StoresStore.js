@@ -8,6 +8,7 @@ class StoresStore {
 
     this.bindListeners({
       addStores: DevActions.addStores,
+      clearAll: DevActions.clearAll,
       selectStore: DevActions.selectStore
     })
   }
@@ -21,6 +22,11 @@ class StoresStore {
       selectedStore,
       stores
     })
+  }
+
+  clearAll() {
+    this.selectedStore = null
+    this.stores = []
   }
 
   selectStore(id) {

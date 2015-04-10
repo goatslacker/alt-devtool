@@ -17,6 +17,8 @@ backgroundPageConnection.onMessage.addListener((message) => {
       return DevActions.addDispatch(message.payload)
     case 'STORES':
       return DevActions.addStores(message.payload.stores)
+    case 'PAGE_UNLOADED':
+      return DevActions.clearAll()
     default:
       console.log('Unknown type ' + message.type)
   }
