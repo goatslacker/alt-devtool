@@ -94,16 +94,14 @@
     }
 
     switch (message.payload.action) {
-      case 'REFRESH_STORES':
-        post('STORES', {
-          stores: parseStores()
-        })
-      return
       case 'SNAPSHOT':
         console.log(window[ALT].takeSnapshot())
       return
       case 'FLUSH':
         console.log(window[ALT].flush())
+        post('STORES', {
+          stores: parseStores()
+        })
       return
       case 'RECYCLE_STORE':
         window[ALT].recycle(message.payload.data.storeName)
@@ -114,6 +112,9 @@
       case 'REVERT':
         if (snapshots[message.payload.data.id]) {
           window[ALT].bootstrap(snapshots[message.payload.data.id])
+          post('STORES', {
+            stores: parseStores()
+          })
         }
       return
       case 'START_RECORDING':
