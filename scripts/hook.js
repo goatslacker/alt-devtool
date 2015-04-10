@@ -3,7 +3,7 @@ window.addEventListener('message', onMessageFromPage)
 
 const script = document.createElement('script')
 script.type = 'text/javascript'
-script.src = chrome.extension.getURL('scripts/altInterface.js')
+script.src = chrome.extension.getURL('dist/altif.js')
 script.onload = function () {
   script.parentNode.removeChild(script)
 }

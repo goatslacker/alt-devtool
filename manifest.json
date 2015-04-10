@@ -21,6 +21,6 @@
     }
   ],
   "web_accessible_resources": [
-    "scripts/altInterface.js"
+    "dist/altif.js"
   ]
 }
