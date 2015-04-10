@@ -1,13 +1,15 @@
 // background.js
 var connections = {};
 
+const cache = []
+
 //console.log('OK I GUESS I LOADED');
 
 chrome.runtime.onConnect.addListener(function (port) {
 
 //  console.log('DID I FUCKING CONNECT????????????????????????');
 
-  var extensionListener = function (message, sender, sendResponse) {
+  function extensionListener(message, sender, sendResponse) {
 
 //    console.log('HOLY SHIT A NEW MESSAGE', message)
 
@@ -15,6 +17,15 @@ chrome.runtime.onConnect.addListener(function (port) {
     // DevTools page, so we need to send it explicitly.
     if (message.name == "init") {
       connections[message.tabId] = port;
+
+      if (cache.length) {
+        // XXX I need to delay these until altInterface is ready
+        cache.forEach(function (post) {
+          post()
+        })
+        cache = []
+      }
+
       return;
     }
 
@@ -59,6 +70,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       connections[tabId].postMessage(request);
     } else {
       console.log("Tab not found in connection list.", tabId);
+      cache.push(function () {
+        connections[tabId].postMessage(request);
+      })
     }
   } else {
     console.log("sender.tab not defined.");
