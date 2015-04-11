@@ -123,7 +123,11 @@ function onMessageFromHook(event) {
     return;
   }
 
-  switch (message.payload.action) {
+  var _message$payload = message.payload;
+  var action = _message$payload.action;
+  var data = _message$payload.data;
+
+  switch (action) {
     case "SNAPSHOT":
       console.log(window[ALT].takeSnapshot());
       return;
@@ -134,18 +138,23 @@ function onMessageFromHook(event) {
       });
       return;
     case "RECYCLE_STORE":
-      window[ALT].recycle(message.payload.data.storeName);
+      window[ALT].recycle(data.storeName);
       post("STORES", {
         stores: parseStores()
       });
       return;
     case "REVERT":
-      if (snapshots[message.payload.data.id]) {
-        window[ALT].bootstrap(snapshots[message.payload.data.id]);
+      if (snapshots[data.id]) {
+        window[ALT].bootstrap(snapshots[data.id]);
         post("STORES", {
           stores: parseStores()
         });
       }
+    case "BOOTSTRAP":
+      if (data.bootstrapData) {
+        window[ALT].bootstrap(data.bootstrapData);
+      }
+      return;
       return;
     case "START_RECORDING":
     // XXX start recording

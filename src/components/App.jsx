@@ -22,6 +22,12 @@ class App extends React.Component {
     this.postMessage('FLUSH')
   }
 
+  bootstrap() {
+    this.postMessage('BOOTSTRAP', {
+      bootstrapData: prompt('Enter JSON bootstrap data')
+    })
+  }
+
   render() {
     return (
       <Tabs>
@@ -47,10 +53,18 @@ class App extends React.Component {
             </label>
             <label>
               <button
-                className="btn btn-lg bg-red"
+                className="btn btn-lg bg-blue"
                 onClick={() => this.flush()}
               >
                 Flush
+              </button>
+            </label>
+            <label>
+              <button
+                className="btn btn-lg bg-blue"
+                onClick={() => this.bootstrap()}
+              >
+                Bootstrap
               </button>
             </label>
           </div>

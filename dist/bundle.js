@@ -29821,6 +29821,13 @@ var App = (function (_React$Component) {
         this.postMessage("FLUSH");
       }
     },
+    bootstrap: {
+      value: function bootstrap() {
+        this.postMessage("BOOTSTRAP", {
+          bootstrapData: prompt("Enter JSON bootstrap data")
+        });
+      }
+    },
     render: {
       value: function render() {
         var _this = this;
@@ -29872,12 +29879,26 @@ var App = (function (_React$Component) {
                 React.createElement(
                   "button",
                   {
-                    className: "btn btn-lg bg-red",
+                    className: "btn btn-lg bg-blue",
                     onClick: function () {
                       return _this.flush();
                     }
                   },
                   "Flush"
+                )
+              ),
+              React.createElement(
+                "label",
+                null,
+                React.createElement(
+                  "button",
+                  {
+                    className: "btn btn-lg bg-blue",
+                    onClick: function () {
+                      return _this.bootstrap();
+                    }
+                  },
+                  "Bootstrap"
                 )
               )
             )
