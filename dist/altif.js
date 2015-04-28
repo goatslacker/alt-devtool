@@ -1,4 +1,47 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+'use strict'
+/**
+ * makeFinalStore(alt: AltInstance): AltStore
+ *
+ * > Creates a `FinalStore` which is a store like any other except that it
+ * waits for all other stores in your alt instance to emit a change before it
+ * emits a change itself.
+ *
+ * Want to know when a particular dispatch has completed? This is the util
+ * you want.
+ *
+ * Good for: taking a snapshot and persisting it somewhere, saving data from
+ * a set of stores, syncing data, etc.
+ *
+ * Usage:
+ *
+ * ```js
+ * var FinalStore = makeFinalStore(alt);
+ *
+ * FinalStore.listen(function () {
+ *   // all stores have now changed
+ * });
+ * ```
+ */
+module.exports = makeFinalStore
+
+function FinalStore() {
+  this.dispatcher.register(function (payload) {
+    var stores = Object.keys(this.alt.stores).reduce(function (arr, store) {
+      return arr.push(this.alt.stores[store].dispatchToken), arr
+    }.bind(this), [])
+
+    this.waitFor(stores)
+    this.setState({ payload: payload })
+    this.emitChange()
+  }.bind(this))
+}
+
+function makeFinalStore(alt) {
+  return alt.createStore(FinalStore, 'AltFinalStore', false)
+}
+
+},{}],2:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -7,31 +50,10 @@ var findAlt = _interopRequire(require("./utils/findAlt"));
 
 findAlt(100);
 
-},{"./utils/findAlt":4}],2:[function(require,module,exports){
+},{"./utils/findAlt":4}],3:[function(require,module,exports){
 "use strict";
 
 module.exports = "goatslacker.github.io/alt/";
-
-},{}],3:[function(require,module,exports){
-// XXX remove after 0.15.5
-"use strict";
-
-function FinalStore() {
-  this.dispatcher.register((function (payload) {
-    var stores = Object.keys(this.alt.stores).reduce((function (arr, store) {
-      return (arr.push(this.alt.stores[store].dispatchToken), arr);
-    }).bind(this), []);
-
-    this.waitFor(stores);
-    this.setState({ payload: payload });
-  }).bind(this));
-}
-
-function makeFinalStore(alt) {
-  return alt.createStore(FinalStore, "AltFinalStore", false);
-}
-
-module.exports = makeFinalStore;
 
 },{}],4:[function(require,module,exports){
 "use strict";
@@ -60,7 +82,7 @@ function poke(time) {
 
 module.exports = poke;
 
-},{"./altKey":2,"./registerAlt":7}],5:[function(require,module,exports){
+},{"./altKey":3,"./registerAlt":7}],5:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -81,7 +103,7 @@ function parseStores() {
 
 module.exports = parseStores;
 
-},{"./altKey":2}],6:[function(require,module,exports){
+},{"./altKey":3}],6:[function(require,module,exports){
 "use strict";
 
 function post(type, payload) {
@@ -101,7 +123,7 @@ var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["defau
 
 var ALT = _interopRequire(require("./altKey"));
 
-var makeFinalStore = _interopRequire(require("./finalStore"));
+var makeFinalStore = _interopRequire(require("alt/utils/makeFinalStore"));
 
 var post = _interopRequire(require("./post"));
 
@@ -202,7 +224,7 @@ function registerAlt() {
 
 module.exports = registerAlt;
 
-},{"./altKey":2,"./finalStore":3,"./parseStores":5,"./post":6,"./uid":8}],8:[function(require,module,exports){
+},{"./altKey":3,"./parseStores":5,"./post":6,"./uid":8,"alt/utils/makeFinalStore":1}],8:[function(require,module,exports){
 "use strict";
 
 function uid() {
@@ -211,4 +233,4 @@ function uid() {
 
 module.exports = uid;
 
-},{}]},{},[1]);
+},{}]},{},[2]);

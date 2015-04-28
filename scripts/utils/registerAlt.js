@@ -1,5 +1,5 @@
 import ALT from './altKey'
-import makeFinalStore from './finalStore'
+import makeFinalStore from 'alt/utils/makeFinalStore'
 import post from './post'
 import parseStores from './parseStores'
 import uid from './uid'
