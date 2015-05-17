@@ -17,7 +17,7 @@
     "watchify": "^2.4.0"
   },
   "dependencies": {
-    "alt": "^0.16.0",
+    "alt": "0.16.5",
     "fixed-data-table": "^0.1.2",
     "object-assign": "^2.0.0",
     "react": "^0.13.1",
