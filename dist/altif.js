@@ -34,7 +34,8 @@ function FinalStore() {
 
   this.dispatcher.register(function (payload) {
     var stores = Object.keys(_this.alt.stores).reduce(function (arr, store) {
-      return (arr.push(_this.alt.stores[store].dispatchToken), arr);
+      arr.push(_this.alt.stores[store].dispatchToken);
+      return arr;
     }, []);
 
     _this.waitFor(stores);
