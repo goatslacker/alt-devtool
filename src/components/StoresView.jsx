@@ -57,32 +57,70 @@ class StoresView extends React.Component {
     DevActions.selectStore(id)
   }
 
+  takeSnapshot() {
+    this.props.postMessage('SNAPSHOT')
+  }
+
+  flush() {
+    this.props.postMessage('FLUSH')
+  }
+
+  bootstrap() {
+    this.props.postMessage('BOOTSTRAP', {
+      bootstrapData: prompt('Enter JSON bootstrap data')
+    })
+  }
+
   render() {
     return (
-      <div className="row">
-        <div className="col c4" ref="table">
-          <Table
-            headerHeight={20}
-            height={this.state.height}
-            onRowClick={this.selectRow}
-            rowGetter={(idx) => this.props.stores[idx]}
-            rowHeight={35}
-            rowsCount={this.props.stores.length}
-            width={this.state.width}
+      <div>
+        <div className="txt-center">
+          <button
+            className="btn btn-sm"
+            onClick={() => this.takeSnapshot()}
           >
-          <Column
-            cellRenderer={this.highlightColumn.bind(this)}
-            dataKey="name"
-            label="Store"
-            width={this.state.width}
-          />
-          </Table>
+            Take Snapshot
+          </button>
+          {' '}
+          <button
+            className="btn btn-sm"
+            onClick={() => this.flush()}
+          >
+            Flush
+          </button>
+          {' '}
+          <button
+            className="btn btn-sm"
+            onClick={() => this.bootstrap()}
+          >
+            Bootstrap
+          </button>
         </div>
+        <div className="row">
+          <div className="col c4" ref="table">
+            <Table
+              headerHeight={20}
+              height={this.state.height}
+              onRowClick={this.selectRow}
+              rowGetter={(idx) => this.props.stores[idx]}
+              rowHeight={35}
+              rowsCount={this.props.stores.length}
+              width={this.state.width}
+            >
+            <Column
+              cellRenderer={this.highlightColumn.bind(this)}
+              dataKey="name"
+              label="Store"
+              width={this.state.width}
+            />
+            </Table>
+          </div>
 
-        <div className="col c8">
-          <FauxTable title="State" height={this.state.height}>
-            <Data data={this.getStoreState()} />
-          </FauxTable>
+          <div className="col c8">
+            <FauxTable title="State" height={this.state.height}>
+              <Data data={this.getStoreState()} />
+            </FauxTable>
+          </div>
         </div>
       </div>
     )

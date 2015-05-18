@@ -30340,27 +30340,8 @@ var App = (function (_React$Component) {
         });
       }
     },
-    takeSnapshot: {
-      value: function takeSnapshot() {
-        this.postMessage("SNAPSHOT");
-      }
-    },
-    flush: {
-      value: function flush() {
-        this.postMessage("FLUSH");
-      }
-    },
-    bootstrap: {
-      value: function bootstrap() {
-        this.postMessage("BOOTSTRAP", {
-          bootstrapData: prompt("Enter JSON bootstrap data")
-        });
-      }
-    },
     render: {
       value: function render() {
-        var _this = this;
-
         return React.createElement(
           Tabs,
           null,
@@ -30380,56 +30361,6 @@ var App = (function (_React$Component) {
               AltContainer,
               { store: StoresStore },
               React.createElement(StoresView, { postMessage: this.postMessage.bind(this) })
-            )
-          ),
-          React.createElement(
-            Tabs.Panel,
-            { title: "Tools" },
-            React.createElement(
-              "div",
-              { className: "sp-lg txt-center" },
-              React.createElement(
-                "label",
-                null,
-                React.createElement(
-                  "button",
-                  {
-                    className: "btn btn-lg bg-blue",
-                    onClick: function () {
-                      return _this.takeSnapshot();
-                    }
-                  },
-                  "Take Snapshot"
-                )
-              ),
-              React.createElement(
-                "label",
-                null,
-                React.createElement(
-                  "button",
-                  {
-                    className: "btn btn-lg bg-blue",
-                    onClick: function () {
-                      return _this.flush();
-                    }
-                  },
-                  "Flush"
-                )
-              ),
-              React.createElement(
-                "label",
-                null,
-                React.createElement(
-                  "button",
-                  {
-                    className: "btn btn-lg bg-blue",
-                    onClick: function () {
-                      return _this.bootstrap();
-                    }
-                  },
-                  "Bootstrap"
-                )
-              )
             )
           )
         );
@@ -31041,44 +30972,101 @@ var StoresView = (function (_React$Component) {
         DevActions.selectStore(id);
       }
     },
+    takeSnapshot: {
+      value: function takeSnapshot() {
+        this.props.postMessage("SNAPSHOT");
+      }
+    },
+    flush: {
+      value: function flush() {
+        this.props.postMessage("FLUSH");
+      }
+    },
+    bootstrap: {
+      value: function bootstrap() {
+        this.props.postMessage("BOOTSTRAP", {
+          bootstrapData: prompt("Enter JSON bootstrap data")
+        });
+      }
+    },
     render: {
       value: function render() {
         var _this = this;
 
         return React.createElement(
           "div",
-          { className: "row" },
+          null,
           React.createElement(
             "div",
-            { className: "col c4", ref: "table" },
+            { className: "txt-center" },
             React.createElement(
-              Table,
+              "button",
               {
-                headerHeight: 20,
-                height: this.state.height,
-                onRowClick: this.selectRow,
-                rowGetter: function (idx) {
-                  return _this.props.stores[idx];
-                },
-                rowHeight: 35,
-                rowsCount: this.props.stores.length,
-                width: this.state.width
+                className: "btn btn-sm",
+                onClick: function () {
+                  return _this.takeSnapshot();
+                }
               },
-              React.createElement(Column, {
-                cellRenderer: this.highlightColumn.bind(this),
-                dataKey: "name",
-                label: "Store",
-                width: this.state.width
-              })
+              "Take Snapshot"
+            ),
+            " ",
+            React.createElement(
+              "button",
+              {
+                className: "btn btn-sm",
+                onClick: function () {
+                  return _this.flush();
+                }
+              },
+              "Flush"
+            ),
+            " ",
+            React.createElement(
+              "button",
+              {
+                className: "btn btn-sm",
+                onClick: function () {
+                  return _this.bootstrap();
+                }
+              },
+              "Bootstrap"
             )
           ),
           React.createElement(
             "div",
-            { className: "col c8" },
+            { className: "row" },
             React.createElement(
-              FauxTable,
-              { title: "State", height: this.state.height },
-              React.createElement(Data, { data: this.getStoreState() })
+              "div",
+              { className: "col c4", ref: "table" },
+              React.createElement(
+                Table,
+                {
+                  headerHeight: 20,
+                  height: this.state.height,
+                  onRowClick: this.selectRow,
+                  rowGetter: function (idx) {
+                    return _this.props.stores[idx];
+                  },
+                  rowHeight: 35,
+                  rowsCount: this.props.stores.length,
+                  width: this.state.width
+                },
+                React.createElement(Column, {
+                  cellRenderer: this.highlightColumn.bind(this),
+                  dataKey: "name",
+                  label: "Store",
+                  width: this.state.width
+                })
+              )
+            ),
+            React.createElement(
+              "div",
+              { className: "col c8" },
+              React.createElement(
+                FauxTable,
+                { title: "State", height: this.state.height },
+                React.createElement(Data, { data: this.getStoreState() })
+              )
             )
           )
         );

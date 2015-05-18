@@ -14,20 +14,6 @@ class App extends React.Component {
     })
   }
 
-  takeSnapshot() {
-    this.postMessage('SNAPSHOT')
-  }
-
-  flush() {
-    this.postMessage('FLUSH')
-  }
-
-  bootstrap() {
-    this.postMessage('BOOTSTRAP', {
-      bootstrapData: prompt('Enter JSON bootstrap data')
-    })
-  }
-
   render() {
     return (
       <Tabs>
@@ -40,34 +26,6 @@ class App extends React.Component {
           <AltContainer store={StoresStore}>
             <StoresView postMessage={this.postMessage.bind(this)} />
           </AltContainer>
-        </Tabs.Panel>
-        <Tabs.Panel title="Tools">
-          <div className="sp-lg txt-center">
-            <label>
-              <button
-                className="btn btn-lg bg-blue"
-                onClick={() => this.takeSnapshot()}
-              >
-                Take Snapshot
-              </button>
-            </label>
-            <label>
-              <button
-                className="btn btn-lg bg-blue"
-                onClick={() => this.flush()}
-              >
-                Flush
-              </button>
-            </label>
-            <label>
-              <button
-                className="btn btn-lg bg-blue"
-                onClick={() => this.bootstrap()}
-              >
-                Bootstrap
-              </button>
-            </label>
-          </div>
         </Tabs.Panel>
       </Tabs>
     )
