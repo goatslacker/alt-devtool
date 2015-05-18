@@ -38,10 +38,10 @@ class DispatcherView extends React.Component {
 
     const node = (
       <div className="row">
-        <div className="col c11">
+        <div className="col c10" style={{ overflow: 'hidden' }}>
           {name}
         </div>
-        <div className="col c1">
+        <div className="col c2">
           <i
             className={`fa ${icon}`}
             onClick={() => this.revertTo(obj.id)}

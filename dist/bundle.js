@@ -30589,12 +30589,12 @@ var DispatcherView = (function (_React$Component) {
           { className: "row" },
           React.createElement(
             "div",
-            { className: "col c11" },
+            { className: "col c10", style: { overflow: "hidden" } },
             name
           ),
           React.createElement(
             "div",
-            { className: "col c1" },
+            { className: "col c2" },
             React.createElement("i", {
               className: "fa " + icon,
               onClick: function () {
