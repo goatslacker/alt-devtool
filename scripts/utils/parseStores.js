@@ -1,8 +1,8 @@
-import ALT from './altKey'
+import getAlt from './alt'
 
 function parseStores() {
-  return Object.keys(window[ALT].stores).map(function (storeName) {
-    const store = window[ALT].stores[storeName]
+  return Object.keys(getAlt().stores).map(function (storeName) {
+    const store = getAlt().stores[storeName]
     return {
       name: storeName,
       state: JSON.stringify(store.getState()),

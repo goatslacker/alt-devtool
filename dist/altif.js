@@ -61,14 +61,18 @@ findAlt(100);
 },{"./utils/findAlt":4}],3:[function(require,module,exports){
 "use strict";
 
-module.exports = "goatslacker.github.io/alt/";
+module.exports = getAlt;
+
+function getAlt() {
+  return window["goatslacker.github.io/alt/"] || window["alt.js.org"];
+}
 
 },{}],4:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 
-var ALT = _interopRequire(require("./altKey"));
+var getAlt = _interopRequire(require("./alt"));
 
 var registerAlt = _interopRequire(require("./registerAlt"));
 
@@ -79,7 +83,7 @@ function poke(time) {
     return;
   }
 
-  if (window[ALT]) {
+  if (getAlt()) {
     registerAlt();
   } else {
     setTimeout(function () {
@@ -90,16 +94,16 @@ function poke(time) {
 
 module.exports = poke;
 
-},{"./altKey":3,"./registerAlt":7}],5:[function(require,module,exports){
+},{"./alt":3,"./registerAlt":7}],5:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 
-var ALT = _interopRequire(require("./altKey"));
+var getAlt = _interopRequire(require("./alt"));
 
 function parseStores() {
-  return Object.keys(window[ALT].stores).map(function (storeName) {
-    var store = window[ALT].stores[storeName];
+  return Object.keys(getAlt().stores).map(function (storeName) {
+    var store = getAlt().stores[storeName];
     return {
       name: storeName,
       state: JSON.stringify(store.getState()),
@@ -111,7 +115,7 @@ function parseStores() {
 
 module.exports = parseStores;
 
-},{"./altKey":3}],6:[function(require,module,exports){
+},{"./alt":3}],6:[function(require,module,exports){
 "use strict";
 
 function post(type, payload) {
@@ -129,7 +133,7 @@ module.exports = post;
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 
-var ALT = _interopRequire(require("./altKey"));
+var getAlt = _interopRequire(require("./alt"));
 
 var makeFinalStore = _interopRequire(require("alt/utils/makeFinalStore"));
 
@@ -159,30 +163,30 @@ function onMessageFromHook(event) {
 
   switch (action) {
     case "SNAPSHOT":
-      console.log(window[ALT].takeSnapshot());
+      console.log(getAlt().takeSnapshot());
       return;
     case "FLUSH":
-      console.log(window[ALT].flush());
+      console.log(getAlt().flush());
       post("STORES", {
         stores: parseStores()
       });
       return;
     case "RECYCLE_STORE":
-      window[ALT].recycle(data.storeName);
+      getAlt().recycle(data.storeName);
       post("STORES", {
         stores: parseStores()
       });
       return;
     case "REVERT":
       if (snapshots[data.id]) {
-        window[ALT].bootstrap(snapshots[data.id]);
+        getAlt().bootstrap(snapshots[data.id]);
         post("STORES", {
           stores: parseStores()
         });
       }
     case "BOOTSTRAP":
       if (data.bootstrapData) {
-        window[ALT].bootstrap(data.bootstrapData);
+        getAlt().bootstrap(data.bootstrapData);
       }
       return;
       return;
@@ -209,7 +213,7 @@ function registerAlt() {
     stores: parseStores()
   });
 
-  var finalStore = makeFinalStore(window[ALT]);
+  var finalStore = makeFinalStore(getAlt());
 
   finalStore.listen(function (_ref) {
     var payload = _ref.payload;
@@ -226,13 +230,13 @@ function registerAlt() {
       data: payload.data
     });
 
-    snapshots[id] = window[ALT].takeSnapshot();
+    snapshots[id] = getAlt().takeSnapshot();
   });
 }
 
 module.exports = registerAlt;
 
-},{"./altKey":3,"./parseStores":5,"./post":6,"./uid":8,"alt/utils/makeFinalStore":1}],8:[function(require,module,exports){
+},{"./alt":3,"./parseStores":5,"./post":6,"./uid":8,"alt/utils/makeFinalStore":1}],8:[function(require,module,exports){
 "use strict";
 
 function uid() {

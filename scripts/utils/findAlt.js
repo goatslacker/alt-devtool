@@ -1,4 +1,4 @@
-import ALT from './altKey'
+import getAlt from './alt'
 import registerAlt from './registerAlt'
 
 const TIMEOUT = 1000
@@ -8,7 +8,7 @@ function poke(time) {
     return
   }
 
-  if (window[ALT]) {
+  if (getAlt()) {
     registerAlt()
   } else {
     setTimeout(function () {

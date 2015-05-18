@@ -1,4 +1,4 @@
-import ALT from './altKey'
+import getAlt from './alt'
 import makeFinalStore from 'alt/utils/makeFinalStore'
 import post from './post'
 import parseStores from './parseStores'
@@ -22,30 +22,30 @@ function onMessageFromHook(event) {
 
   switch (action) {
     case 'SNAPSHOT':
-      console.log(window[ALT].takeSnapshot())
+      console.log(getAlt().takeSnapshot())
     return
     case 'FLUSH':
-      console.log(window[ALT].flush())
+      console.log(getAlt().flush())
       post('STORES', {
         stores: parseStores()
       })
     return
     case 'RECYCLE_STORE':
-      window[ALT].recycle(data.storeName)
+      getAlt().recycle(data.storeName)
       post('STORES', {
         stores: parseStores()
       })
     return
     case 'REVERT':
       if (snapshots[data.id]) {
-        window[ALT].bootstrap(snapshots[data.id])
+        getAlt().bootstrap(snapshots[data.id])
         post('STORES', {
           stores: parseStores()
         })
       }
     case 'BOOTSTRAP':
       if (data.bootstrapData) {
-        window[ALT].bootstrap(data.bootstrapData)
+        getAlt().bootstrap(data.bootstrapData)
       }
     return
     return
@@ -72,7 +72,7 @@ function registerAlt() {
     stores: parseStores()
   })
 
-  const finalStore = makeFinalStore(window[ALT])
+  const finalStore = makeFinalStore(getAlt())
 
   finalStore.listen(function ({ payload }) {
     const id = uid()
@@ -87,7 +87,7 @@ function registerAlt() {
       data: payload.data
     })
 
-    snapshots[id] = window[ALT].takeSnapshot()
+    snapshots[id] = getAlt().takeSnapshot()
   })
 }
 
