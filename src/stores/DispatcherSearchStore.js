@@ -55,7 +55,10 @@ class DispatcherSearchStore {
   }
 
   select(payload) {
-    this.selectedPayload = payload
+    this.selectedPayload = {
+      action: payload.action,
+      data: payload.data
+    }
   }
 
   toggleLogDispatch() {
@@ -77,9 +80,7 @@ class DispatcherSearchStore {
     })
 
     const selectedPayload = filteredDispatches.reduce((obj, dispatch) => {
-      return dispatch.data === this.selectedPayload
-        ? dispatch.data
-        : obj
+      return dispatch.data === this.selectedPayload.data ? dispatch : obj
     }, {})
 
     return this.setState({

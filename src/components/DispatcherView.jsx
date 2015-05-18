@@ -64,13 +64,13 @@ class DispatcherView extends React.Component {
   }
 
   highlightColumn(node, obj) {
-    return obj.data === this.props.selectedPayload
+    return obj.data === this.props.selectedPayload.data
       ? <div style={{ background: '#70bde6' }}>{node}</div>
       : node
   }
 
   selectRow(ev, id, rowData) {
-    DevActions.selectRow(rowData.data)
+    DevActions.selectRow(rowData)
   }
 
   toggleLogDispatch() {

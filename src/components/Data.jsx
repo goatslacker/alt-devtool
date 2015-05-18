@@ -18,7 +18,15 @@ class Leaf extends React.Component {
       }
 
       return Object.keys(this.props.data).map((node, i) => {
-        return <Leaf key={i} label={node} data={this.props.data[node]} />
+        return (
+          <Leaf
+            key={i}
+            label={node}
+            data={this.props.data[node]}
+            level={this.props.level + 1}
+            hidden={this.props.level > 0}
+          />
+        )
       })
     } else {
       const jstype = typeof this.props.data
@@ -35,7 +43,7 @@ class Leaf extends React.Component {
   }
 
   renderLabel() {
-    const label = this.props.label || 'root'
+    const label = this.props.label || 'dispatch'
 
     const jstype = typeof this.props.data
 
@@ -89,7 +97,7 @@ class Data extends React.Component {
   render() {
     return (
       <div className="json-inspector">
-        <Leaf data={this.props.data} hidden={false} />
+        <Leaf data={this.props.data} hidden={false} level={0} />
       </div>
     )
   }

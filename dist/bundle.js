@@ -30414,7 +30414,13 @@ var Leaf = (function (_React$Component) {
           }
 
           return Object.keys(this.props.data).map(function (node, i) {
-            return React.createElement(Leaf, { key: i, label: node, data: _this.props.data[node] });
+            return React.createElement(Leaf, {
+              key: i,
+              label: node,
+              data: _this.props.data[node],
+              level: _this.props.level + 1,
+              hidden: _this.props.level > 0
+            });
           });
         } else {
           var jstype = typeof this.props.data;
@@ -30435,7 +30441,7 @@ var Leaf = (function (_React$Component) {
     },
     renderLabel: {
       value: function renderLabel() {
-        var label = this.props.label || "root";
+        var label = this.props.label || "dispatch";
 
         var jstype = typeof this.props.data;
 
@@ -30505,7 +30511,7 @@ var Data = (function (_React$Component2) {
         return React.createElement(
           "div",
           { className: "json-inspector" },
-          React.createElement(Leaf, { data: this.props.data, hidden: false })
+          React.createElement(Leaf, { data: this.props.data, hidden: false, level: 0 })
         );
       }
     }
@@ -30621,7 +30627,7 @@ var DispatcherView = (function (_React$Component) {
     },
     highlightColumn: {
       value: function highlightColumn(node, obj) {
-        return obj.data === this.props.selectedPayload ? React.createElement(
+        return obj.data === this.props.selectedPayload.data ? React.createElement(
           "div",
           { style: { background: "#70bde6" } },
           node
@@ -30630,7 +30636,7 @@ var DispatcherView = (function (_React$Component) {
     },
     selectRow: {
       value: function selectRow(ev, id, rowData) {
-        DevActions.selectRow(rowData.data);
+        DevActions.selectRow(rowData);
       }
     },
     toggleLogDispatch: {
@@ -31169,7 +31175,10 @@ var DispatcherSearchStore = (function () {
     },
     select: {
       value: function select(payload) {
-        this.selectedPayload = payload;
+        this.selectedPayload = {
+          action: payload.action,
+          data: payload.data
+        };
       }
     },
     toggleLogDispatch: {
@@ -31197,7 +31206,7 @@ var DispatcherSearchStore = (function () {
         });
 
         var selectedPayload = filteredDispatches.reduce(function (obj, dispatch) {
-          return dispatch.data === _this.selectedPayload ? dispatch.data : obj;
+          return dispatch.data === _this.selectedPayload.data ? dispatch : obj;
         }, {});
 
         return this.setState({
