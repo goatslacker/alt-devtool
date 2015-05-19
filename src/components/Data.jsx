@@ -12,7 +12,7 @@ class Leaf extends React.Component {
   }
 
   renderValue() {
-    if (typeof this.props.data === 'object') {
+    if (typeof this.props.data === 'object' && this.props.data) {
       if (this.state.hidden) {
         return null
       }
