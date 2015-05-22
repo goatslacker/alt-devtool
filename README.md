@@ -8,6 +8,23 @@ then visit this link:
 https://cdn.rawgit.com/goatslacker/alt-devtool/master/dist/alt-dev.crx
 
 
+## Installing
+
+Open up Chrome extensions. Drag the extension onto there. Accept the ridiculous permissions.
+
+In your alt app you'll need to use [chromeDebug](https://github.com/goatslacker/alt/blob/master/src/utils/chromeDebug.js)
+
+```js
+var Alt = require('alt');
+var chromeDebug = require('alt/utils/chromeDebug');
+
+var alt = new Alt();
+chromeDebug(alt);
+
+module.exports = alt;
+```
+
+
 ## Permissions
 
 This extension requires the ability to "Read and change all your data on the websites you visit" according to Google.
