@@ -1,7 +1,7 @@
 import getAlt from './alt'
 import registerAlt from './registerAlt'
 
-const TIMEOUT = 1000
+const TIMEOUT = 30000
 
 function poke(time) {
   if (time > TIMEOUT) {

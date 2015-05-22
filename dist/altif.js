@@ -76,7 +76,7 @@ var getAlt = _interopRequire(require("./alt"));
 
 var registerAlt = _interopRequire(require("./registerAlt"));
 
-var TIMEOUT = 1000;
+var TIMEOUT = 30000;
 
 function poke(time) {
   if (time > TIMEOUT) {
