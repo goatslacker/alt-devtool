@@ -5,8 +5,7 @@
 If you'd like to install this yourself without going through the chrome store
 then visit this link:
 
-https://cdn.rawgit.com/goatslacker/alt-devtool/master/dist/alt-dev.crx
-
+https://github.com/goatslacker/alt-devtool/raw/master/dist/alt-dev.crx
 
 ## Installing
 
