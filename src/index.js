@@ -1,4 +1,5 @@
 import assign from 'object-assign'
+
 Object.assign = Object.assign || assign
 
 import Alt from 'alt'
@@ -13,10 +14,12 @@ const backgroundPageConnection = chrome.runtime.connect({
 
 backgroundPageConnection.onMessage.addListener((message) => {
   switch (message.type) {
+    case 'ALT':
+      return DevActions.replaceAlts(message.payload.alts)
     case 'DISPATCH':
       return DevActions.addDispatch(message.payload)
     case 'STORES':
-      return DevActions.addStores(message.payload.stores)
+      return DevActions.addStores(message.payload)
     case 'PAGE_UNLOADED':
       return DevActions.clearAll()
     default:

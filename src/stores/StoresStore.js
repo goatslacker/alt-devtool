@@ -1,32 +1,33 @@
 import DevActions from '../actions/DevActions'
 import alt from '../flux/alt'
+import AltStore from '../stores/AltStore'
 
+// XXX maybe some microflux?
 class StoresStore {
+//  static displayName = 'StoresStore'
+
   constructor() {
     this.selectedStore = null
     this.stores = []
 
+    this.dispatcher.register(() => {
+      this.stores = AltStore.getStores()
+      this.emitChange()
+    })
+
     this.bindListeners({
-      addStores: DevActions.addStores,
       clearAll: DevActions.clearAll,
-      selectStore: DevActions.selectStore
+      selectAlt: DevActions.selectAlt,
+      selectStore: DevActions.selectStore,
     })
   }
 
-  addStores(stores) {
-    const selectedStore = this.selectedStore === null
-      ? this.stores.length ? 0 : null
-      : this.selectedStore
-
-    return this.setState({
-      selectedStore,
-      stores
-    })
+  selectAlt() {
+    this.selectedStore = null
   }
 
   clearAll() {
     this.selectedStore = null
-    this.stores = []
   }
 
   selectStore(id) {
@@ -34,4 +35,4 @@ class StoresStore {
   }
 }
 
-export default alt.createStore(StoresStore, 'StoresStore')
+export default alt.createStore(StoresStore)

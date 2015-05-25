@@ -1,4 +1,4 @@
-import getAlt from './alt'
+import alts from './alts'
 import registerAlt from './registerAlt'
 
 const TIMEOUT = 30000
@@ -8,7 +8,7 @@ function poke(time) {
     return
   }
 
-  if (getAlt()) {
+  if (alts.get()) {
     registerAlt()
   } else {
     setTimeout(function () {

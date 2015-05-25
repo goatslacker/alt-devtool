@@ -1,39 +1,37 @@
+import AltStore from './AltStore'
 import DevActions from '../actions/DevActions'
 import DispatcherStore from './DispatcherStore'
 import alt from '../flux/alt'
 import stringScore from '../utils/stringScore'
 
 class DispatcherSearchStore {
+//  static displayName = 'DispatcherSearchStore'
+
   constructor() {
     this.dispatches = []
-    this.logDispatches = DispatcherStore.getState().logDispatches
     this.revertId = null
     this.searchValue = ''
     this.selectedPayload = {}
 
+    this.alt.dispatcher.register(() => {
+      this.waitFor(AltStore, DispatcherStore)
+
+      const { logDispatches } = AltStore.getState()
+      if (!logDispatches) return
+
+      this.updateSearch(this.searchValue)
+
+      // XXX ugh manually emitting a change sucks.
+      // I need a way to listen to all actions and auto emit change.
+      this.emitChange()
+    })
+
     this.bindListeners({
-      addItem: DevActions.addDispatch,
-      clearAll: DevActions.clearAll,
-      clearDispatches: DevActions.clearDispatches,
+      clearAll: [DevActions.clearAll, DevActions.clearDispatches],
       revert: DevActions.revert,
       search: DevActions.search,
       select: DevActions.selectRow,
-      toggleLogDispatch: DevActions.toggleLogDispatch
     })
-  }
-
-  beforeEach() {
-    this.waitFor(DispatcherStore)
-  }
-
-  addItem() {
-    const { logDispatches } = DispatcherStore.getState()
-
-    if (!logDispatches) {
-      return false
-    }
-
-    return this.updateSearch(this.searchValue)
   }
 
   clearAll() {
@@ -42,16 +40,12 @@ class DispatcherSearchStore {
     this.selectedPayload = {}
   }
 
-  clearDispatches() {
-    this.clearAll()
-  }
-
   revert(id) {
     this.revertId = id
   }
 
   search(searchValue) {
-    return this.updateSearch(searchValue)
+    this.updateSearch(searchValue)
   }
 
   select(payload) {
@@ -61,18 +55,15 @@ class DispatcherSearchStore {
     }
   }
 
-  toggleLogDispatch() {
-    this.logDispatches = DispatcherStore.getState().logDispatches
-  }
-
   updateSearch(searchValue) {
     const { dispatches } = DispatcherStore.getState()
 
     if (!searchValue.trim()) {
-      return this.setState({
+      this.setState({
         dispatches,
         searchValue
       })
+      return
     }
 
     const filteredDispatches = dispatches.filter((dispatch) => {
@@ -83,7 +74,7 @@ class DispatcherSearchStore {
       return dispatch.data === this.selectedPayload.data ? dispatch : obj
     }, {})
 
-    return this.setState({
+    this.setState({
       dispatches: filteredDispatches,
       searchValue,
       selectedPayload
@@ -91,4 +82,4 @@ class DispatcherSearchStore {
   }
 }
 
-export default alt.createStore(DispatcherSearchStore, 'DispatcherSearchStore')
+export default alt.createStore(DispatcherSearchStore)

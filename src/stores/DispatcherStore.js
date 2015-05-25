@@ -1,48 +1,20 @@
-import DevActions from '../actions/DevActions'
-import StoresStore from './StoresStore'
+import AltStore from './AltStore'
 import alt from '../flux/alt'
 
+// XXX maybe some microflux?
 class DispatcherStore {
+//  static displayName = 'DispatcherStore'
+
   constructor() {
     this.dispatches = []
-    this.logDispatches = true
 
-    this.bindListeners({
-      addItem: DevActions.addDispatch,
-      clearAll: DevActions.clearAll,
-      clearDispatches: DevActions.clearDispatches,
-      toggleLogDispatch: DevActions.toggleLogDispatch
+    this.alt.dispatcher.register(() => {
+      this.waitFor(AltStore)
+
+      this.dispatches = AltStore.getDispatches()
+      this.emitChange()
     })
-  }
-
-  addItem(dispatch) {
-    if (!this.logDispatches) {
-      return false
-    }
-
-    const { stores } = StoresStore.getState()
-
-    const dispatchedStores = stores
-      .filter((x) => x.listeners.indexOf(dispatch.action) > -1)
-      .map((x) => x.name)
-      .join(', ')
-
-    this.dispatches.unshift(Object.assign({
-      stores: dispatchedStores
-    }, dispatch))
-  }
-
-  clearAll() {
-    this.dispatches = []
-  }
-
-  clearDispatches() {
-    this.clearAll()
-  }
-
-  toggleLogDispatch() {
-    this.logDispatches = !this.logDispatches
   }
 }
 
-export default alt.createStore(DispatcherStore, 'DispatcherStore')
+export default alt.createStore(DispatcherStore)

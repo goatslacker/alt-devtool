@@ -791,17 +791,23 @@ var StoreMixin = {
   },
 
   exportAsync: function exportAsync(asyncMethods) {
+    this.registerAsync(asyncMethods);
+  },
+
+  registerAsync: function registerAsync(asyncDef) {
     var _this = this;
 
-    var _isLoading = false;
-    var _hasError = false;
+    var loadCounter = 0;
+
+    var asyncMethods = fn.isFunction(asyncDef) ? asyncDef(this.alt) : asyncDef;
 
     var toExport = Object.keys(asyncMethods).reduce(function (publicMethods, methodName) {
-      var asyncSpec = asyncMethods[methodName](_this);
+      var desc = asyncMethods[methodName];
+      var spec = fn.isFunction(desc) ? desc(_this) : desc;
 
       var validHandlers = ['success', 'error', 'loading'];
       validHandlers.forEach(function (handler) {
-        if (asyncSpec[handler] && !asyncSpec[handler][Sym.ACTION_KEY]) {
+        if (spec[handler] && !spec[handler][Sym.ACTION_KEY]) {
           throw new Error('' + handler + ' handler must be an action function');
         }
       });
@@ -812,21 +818,20 @@ var StoreMixin = {
         }
 
         var state = _this.getInstance().getState();
-        var value = asyncSpec.local && asyncSpec.local.apply(asyncSpec, [state].concat(args));
+        var value = spec.local && spec.local.apply(spec, [state].concat(args));
+        var shouldFetch = spec.shouldFetch ? spec.shouldFetch.apply(spec, [state].concat(args)) : !value;
 
         // if we don't have it in cache then fetch it
-        if (!value) {
-          _isLoading = true;
-          _hasError = false;
+        if (shouldFetch) {
+          loadCounter += 1;
           /* istanbul ignore else */
-          if (asyncSpec.loading) asyncSpec.loading();
-          asyncSpec.remote.apply(asyncSpec, [state].concat(args)).then(function (v) {
-            _isLoading = false;
-            asyncSpec.success(v);
+          if (spec.loading) spec.loading();
+          spec.remote.apply(spec, [state].concat(args)).then(function (v) {
+            loadCounter -= 1;
+            spec.success(v);
           })['catch'](function (v) {
-            _isLoading = false;
-            _hasError = true;
-            asyncSpec.error(v);
+            loadCounter -= 1;
+            spec.error(v);
           });
         } else {
           // otherwise emit the change now
@@ -840,10 +845,7 @@ var StoreMixin = {
     this.exportPublicMethods(toExport);
     this.exportPublicMethods({
       isLoading: function isLoading() {
-        return _isLoading;
-      },
-      hasError: function hasError() {
-        return _hasError;
+        return loadCounter > 0;
       }
     });
   },
@@ -1258,13 +1260,17 @@ function setAppState(instance, data, onStore) {
   fn.eachObject(function (key, value) {
     var store = instance.stores[key];
     if (store) {
-      var config = store.StoreModel.config;
+      (function () {
+        var config = store.StoreModel.config;
 
-      if (config.onDeserialize) {
-        obj[key] = config.onDeserialize(value) || value;
-      }
-      fn.assign(store[Sym.STATE_CONTAINER], obj[key]);
-      onStore(store);
+        var state = store[Sym.STATE_CONTAINER];
+        if (config.onDeserialize) obj[key] = config.onDeserialize(value) || value;
+        fn.eachObject(function (k) {
+          return delete state[k];
+        }, [state]);
+        fn.assign(state, obj[key]);
+        onStore(store);
+      })();
     }
   }, [obj]);
 }
@@ -9239,7 +9245,9 @@ var isUnitlessNumber = {
   columnCount: true,
   flex: true,
   flexGrow: true,
+  flexPositive: true,
   flexShrink: true,
+  flexNegative: true,
   fontWeight: true,
   lineClamp: true,
   lineHeight: true,
@@ -9252,7 +9260,9 @@ var isUnitlessNumber = {
 
   // SVG-related properties
   fillOpacity: true,
-  strokeOpacity: true
+  strokeDashoffset: true,
+  strokeOpacity: true,
+  strokeWidth: true
 };
 
 /**
@@ -12339,6 +12349,7 @@ var HTMLDOMPropertyConfig = {
     headers: null,
     height: MUST_USE_ATTRIBUTE,
     hidden: MUST_USE_ATTRIBUTE | HAS_BOOLEAN_VALUE,
+    high: null,
     href: null,
     hrefLang: null,
     htmlFor: null,
@@ -12349,6 +12360,7 @@ var HTMLDOMPropertyConfig = {
     lang: null,
     list: MUST_USE_ATTRIBUTE,
     loop: MUST_USE_PROPERTY | HAS_BOOLEAN_VALUE,
+    low: null,
     manifest: MUST_USE_ATTRIBUTE,
     marginHeight: null,
     marginWidth: null,
@@ -12363,6 +12375,7 @@ var HTMLDOMPropertyConfig = {
     name: null,
     noValidate: HAS_BOOLEAN_VALUE,
     open: HAS_BOOLEAN_VALUE,
+    optimum: null,
     pattern: null,
     placeholder: null,
     poster: null,
@@ -12376,6 +12389,7 @@ var HTMLDOMPropertyConfig = {
     rowSpan: null,
     sandbox: null,
     scope: null,
+    scoped: HAS_BOOLEAN_VALUE,
     scrolling: null,
     seamless: MUST_USE_ATTRIBUTE | HAS_BOOLEAN_VALUE,
     selected: MUST_USE_PROPERTY | HAS_BOOLEAN_VALUE,
@@ -12417,7 +12431,9 @@ var HTMLDOMPropertyConfig = {
     itemID: MUST_USE_ATTRIBUTE,
     itemRef: MUST_USE_ATTRIBUTE,
     // property is supported for OpenGraph in meta tags.
-    property: null
+    property: null,
+    // IE-only attribute that controls focus behavior
+    unselectable: MUST_USE_ATTRIBUTE
   },
   DOMAttributeNames: {
     acceptCharset: 'accept-charset',
@@ -13033,7 +13049,7 @@ if ("production" !== process.env.NODE_ENV) {
       if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ === 'undefined') {
         console.debug(
           'Download the React DevTools for a better development experience: ' +
-          'http://fb.me/react-devtools'
+          'https://fb.me/react-devtools'
         );
       }
     }
@@ -13060,7 +13076,7 @@ if ("production" !== process.env.NODE_ENV) {
       if (!expectedFeatures[i]) {
         console.error(
           'One or more ES5 shim/shams expected by React are not available: ' +
-          'http://fb.me/react-warning-polyfills'
+          'https://fb.me/react-warning-polyfills'
         );
         break;
       }
@@ -13068,7 +13084,7 @@ if ("production" !== process.env.NODE_ENV) {
   }
 }
 
-React.version = '0.13.1';
+React.version = '0.13.3';
 
 module.exports = React;
 
@@ -14793,7 +14809,7 @@ var ReactClass = {
         ("production" !== process.env.NODE_ENV ? warning(
           this instanceof Constructor,
           'Something is calling a React component directly. Use a factory or ' +
-          'JSX instead. See: http://fb.me/react-legacyfactory'
+          'JSX instead. See: https://fb.me/react-legacyfactory'
         ) : null);
       }
 
@@ -15005,20 +15021,38 @@ ReactComponent.prototype.forceUpdate = function(callback) {
  */
 if ("production" !== process.env.NODE_ENV) {
   var deprecatedAPIs = {
-    getDOMNode: 'getDOMNode',
-    isMounted: 'isMounted',
-    replaceProps: 'replaceProps',
-    replaceState: 'replaceState',
-    setProps: 'setProps'
+    getDOMNode: [
+      'getDOMNode',
+      'Use React.findDOMNode(component) instead.'
+    ],
+    isMounted: [
+      'isMounted',
+      'Instead, make sure to clean up subscriptions and pending requests in ' +
+      'componentWillUnmount to prevent memory leaks.'
+    ],
+    replaceProps: [
+      'replaceProps',
+      'Instead, call React.render again at the top level.'
+    ],
+    replaceState: [
+      'replaceState',
+      'Refactor your code to use setState instead (see ' +
+      'https://github.com/facebook/react/issues/3236).'
+    ],
+    setProps: [
+      'setProps',
+      'Instead, call React.render again at the top level.'
+    ]
   };
-  var defineDeprecationWarning = function(methodName, displayName) {
+  var defineDeprecationWarning = function(methodName, info) {
     try {
       Object.defineProperty(ReactComponent.prototype, methodName, {
         get: function() {
           ("production" !== process.env.NODE_ENV ? warning(
             false,
-            '%s(...) is deprecated in plain JavaScript React classes.',
-            displayName
+            '%s(...) is deprecated in plain JavaScript React classes. %s',
+            info[0],
+            info[1]
           ) : null);
           return undefined;
         }
@@ -15373,6 +15407,14 @@ var ReactCompositeComponentMixin = {
         this.getName() || 'a component'
       ) : null);
       ("production" !== process.env.NODE_ENV ? warning(
+        !inst.getDefaultProps ||
+        inst.getDefaultProps.isReactClassApproved,
+        'getDefaultProps was defined on %s, a plain JavaScript class. ' +
+        'This is only supported for classes created using React.createClass. ' +
+        'Use a static property to define defaultProps instead.',
+        this.getName() || 'a component'
+      ) : null);
+      ("production" !== process.env.NODE_ENV ? warning(
         !inst.propTypes,
         'propTypes was defined as an instance property on %s. Use a static ' +
         'property to define propTypes instead.',
@@ -15408,6 +15450,7 @@ var ReactCompositeComponentMixin = {
     this._pendingReplaceState = false;
     this._pendingForceUpdate = false;
 
+    var childContext;
     var renderedElement;
 
     var previouslyMounting = ReactLifeCycle.currentlyMountingInstance;
@@ -15422,7 +15465,8 @@ var ReactCompositeComponentMixin = {
         }
       }
 
-      renderedElement = this._renderValidatedComponent();
+      childContext = this._getValidatedChildContext(context);
+      renderedElement = this._renderValidatedComponent(childContext);
     } finally {
       ReactLifeCycle.currentlyMountingInstance = previouslyMounting;
     }
@@ -15436,7 +15480,7 @@ var ReactCompositeComponentMixin = {
       this._renderedComponent,
       rootID,
       transaction,
-      this._processChildContext(context)
+      this._mergeChildContext(context, childContext)
     );
     if (inst.componentDidMount) {
       transaction.getReactMountReady().enqueue(inst.componentDidMount, inst);
@@ -15566,7 +15610,7 @@ var ReactCompositeComponentMixin = {
    * @return {object}
    * @private
    */
-  _processChildContext: function(currentContext) {
+  _getValidatedChildContext: function(currentContext) {
     var inst = this._instance;
     var childContext = inst.getChildContext && inst.getChildContext();
     if (childContext) {
@@ -15591,6 +15635,13 @@ var ReactCompositeComponentMixin = {
           name
         ) : invariant(name in inst.constructor.childContextTypes));
       }
+      return childContext;
+    }
+    return null;
+  },
+
+  _mergeChildContext: function(currentContext, childContext) {
+    if (childContext) {
       return assign({}, currentContext, childContext);
     }
     return currentContext;
@@ -15850,6 +15901,10 @@ var ReactCompositeComponentMixin = {
       return inst.state;
     }
 
+    if (replace && queue.length === 1) {
+      return queue[0];
+    }
+
     var nextState = assign({}, replace ? queue[0] : inst.state);
     for (var i = replace ? 1 : 0; i < queue.length; i++) {
       var partial = queue[i];
@@ -15919,13 +15974,14 @@ var ReactCompositeComponentMixin = {
   _updateRenderedComponent: function(transaction, context) {
     var prevComponentInstance = this._renderedComponent;
     var prevRenderedElement = prevComponentInstance._currentElement;
-    var nextRenderedElement = this._renderValidatedComponent();
+    var childContext = this._getValidatedChildContext();
+    var nextRenderedElement = this._renderValidatedComponent(childContext);
     if (shouldUpdateReactComponent(prevRenderedElement, nextRenderedElement)) {
       ReactReconciler.receiveComponent(
         prevComponentInstance,
         nextRenderedElement,
         transaction,
-        this._processChildContext(context)
+        this._mergeChildContext(context, childContext)
       );
     } else {
       // These two IDs are actually the same! But nothing should rely on that.
@@ -15941,7 +15997,7 @@ var ReactCompositeComponentMixin = {
         this._renderedComponent,
         thisID,
         transaction,
-        context
+        this._mergeChildContext(context, childContext)
       );
       this._replaceNodeWithMarkupByID(prevComponentID, nextMarkup);
     }
@@ -15979,11 +16035,12 @@ var ReactCompositeComponentMixin = {
   /**
    * @private
    */
-  _renderValidatedComponent: function() {
+  _renderValidatedComponent: function(childContext) {
     var renderedComponent;
     var previousContext = ReactContext.current;
-    ReactContext.current = this._processChildContext(
-      this._currentElement._context
+    ReactContext.current = this._mergeChildContext(
+      this._currentElement._context,
+      childContext
     );
     ReactCurrentOwner.current = this;
     try {
@@ -16352,6 +16409,7 @@ var ReactDOM = mapObject({
 
   // SVG
   circle: 'circle',
+  clipPath: 'clipPath',
   defs: 'defs',
   ellipse: 'ellipse',
   g: 'g',
@@ -16503,11 +16561,13 @@ function assertValidProps(props) {
       'Can only set one of `children` or `props.dangerouslySetInnerHTML`.'
     ) : invariant(props.children == null));
     ("production" !== process.env.NODE_ENV ? invariant(
-      props.dangerouslySetInnerHTML.__html != null,
+      typeof props.dangerouslySetInnerHTML === 'object' &&
+      '__html' in props.dangerouslySetInnerHTML,
       '`props.dangerouslySetInnerHTML` must be in the form `{__html: ...}`. ' +
-      'Please visit http://fb.me/react-invariant-dangerously-set-inner-html ' +
+      'Please visit https://fb.me/react-invariant-dangerously-set-inner-html ' +
       'for more information.'
-    ) : invariant(props.dangerouslySetInnerHTML.__html != null));
+    ) : invariant(typeof props.dangerouslySetInnerHTML === 'object' &&
+    '__html' in props.dangerouslySetInnerHTML));
   }
   if ("production" !== process.env.NODE_ENV) {
     ("production" !== process.env.NODE_ENV ? warning(
@@ -16815,6 +16875,8 @@ ReactDOMComponent.Mixin = {
       if (propKey === STYLE) {
         if (nextProp) {
           nextProp = this._previousStyleCopy = assign({}, nextProp);
+        } else {
+          this._previousStyleCopy = null;
         }
         if (lastProp) {
           // Unset styles on `lastProp` but not on `nextProp`.
@@ -19311,7 +19373,7 @@ function warnAndMonitorForKeyUse(message, element, parentType) {
 
   ("production" !== process.env.NODE_ENV ? warning(
     false,
-    message + '%s%s See http://fb.me/react-warning-keys for more information.',
+    message + '%s%s See https://fb.me/react-warning-keys for more information.',
     parentOrOwnerAddendum,
     childOwnerAddendum
   ) : null);
@@ -19435,9 +19497,9 @@ function warnForPropsMutation(propName, element) {
 
   ("production" !== process.env.NODE_ENV ? warning(
     false,
-    'Don\'t set .props.%s of the React component%s. ' +
-    'Instead, specify the correct value when ' +
-    'initially creating the element.%s',
+    'Don\'t set .props.%s of the React component%s. Instead, specify the ' +
+    'correct value when initially creating the element or use ' +
+    'React.cloneElement to make a new element with updated props.%s',
     propName,
     elementInfo,
     ownerInfo
@@ -23847,6 +23909,7 @@ var ReactUpdates = require("./ReactUpdates");
 var SyntheticEvent = require("./SyntheticEvent");
 
 var assign = require("./Object.assign");
+var emptyObject = require("./emptyObject");
 
 var topLevelTypes = EventConstants.topLevelTypes;
 
@@ -24188,6 +24251,9 @@ assign(
 );
 
 ReactShallowRenderer.prototype.render = function(element, context) {
+  if (!context) {
+    context = emptyObject;
+  }
   var transaction = ReactUpdates.ReactReconcileTransaction.getPooled();
   this._render(element, transaction, context);
   ReactUpdates.ReactReconcileTransaction.release(transaction);
@@ -24328,7 +24394,7 @@ for (eventType in topLevelTypes) {
 
 module.exports = ReactTestUtils;
 
-},{"./EventConstants":87,"./EventPluginHub":89,"./EventPropagators":92,"./Object.assign":100,"./React":102,"./ReactBrowserEventEmitter":104,"./ReactCompositeComponent":114,"./ReactElement":134,"./ReactEmptyComponent":136,"./ReactInstanceHandles":143,"./ReactInstanceMap":144,"./ReactMount":148,"./ReactUpdates":171,"./SyntheticEvent":180}],167:[function(require,module,exports){
+},{"./EventConstants":87,"./EventPluginHub":89,"./EventPropagators":92,"./Object.assign":100,"./React":102,"./ReactBrowserEventEmitter":104,"./ReactCompositeComponent":114,"./ReactElement":134,"./ReactEmptyComponent":136,"./ReactInstanceHandles":143,"./ReactInstanceMap":144,"./ReactMount":148,"./ReactUpdates":171,"./SyntheticEvent":180,"./emptyObject":202}],167:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -25433,6 +25499,7 @@ var MUST_USE_ATTRIBUTE = DOMProperty.injection.MUST_USE_ATTRIBUTE;
 
 var SVGDOMPropertyConfig = {
   Properties: {
+    clipPath: MUST_USE_ATTRIBUTE,
     cx: MUST_USE_ATTRIBUTE,
     cy: MUST_USE_ATTRIBUTE,
     d: MUST_USE_ATTRIBUTE,
@@ -25478,6 +25545,7 @@ var SVGDOMPropertyConfig = {
     y: MUST_USE_ATTRIBUTE
   },
   DOMAttributeNames: {
+    clipPath: 'clip-path',
     fillOpacity: 'fill-opacity',
     fontFamily: 'font-family',
     fontSize: 'font-size',
@@ -28405,6 +28473,7 @@ var shouldWrap = {
   // Force wrapping for SVG elements because if they get created inside a <div>,
   // they will be initialized in the wrong namespace (and will not display).
   'circle': true,
+  'clipPath': true,
   'defs': true,
   'ellipse': true,
   'g': true,
@@ -28447,6 +28516,7 @@ var markupWrap = {
   'th': trWrap,
 
   'circle': svgWrap,
+  'clipPath': svgWrap,
   'defs': svgWrap,
   'ellipse': svgWrap,
   'g': svgWrap,
@@ -28794,6 +28864,7 @@ assign(
 function isInternalComponentType(type) {
   return (
     typeof type === 'function' &&
+    typeof type.prototype !== 'undefined' &&
     typeof type.prototype.mountComponent === 'function' &&
     typeof type.prototype.receiveComponent === 'function'
   );
@@ -30063,11 +30134,14 @@ module.exports = traverseAllChildren;
  * @providesModule update
  */
 
+ /* global hasOwnProperty:true */
+
 'use strict';
 
 var assign = require("./Object.assign");
 var keyOf = require("./keyOf");
 var invariant = require("./invariant");
+var hasOwnProperty = {}.hasOwnProperty;
 
 function shallowCopy(x) {
   if (Array.isArray(x)) {
@@ -30127,7 +30201,7 @@ function update(value, spec) {
     COMMAND_SET
   ) : invariant(typeof spec === 'object'));
 
-  if (spec.hasOwnProperty(COMMAND_SET)) {
+  if (hasOwnProperty.call(spec, COMMAND_SET)) {
     ("production" !== process.env.NODE_ENV ? invariant(
       Object.keys(spec).length === 1,
       'Cannot have more than one key in an object with %s',
@@ -30139,7 +30213,7 @@ function update(value, spec) {
 
   var nextValue = shallowCopy(value);
 
-  if (spec.hasOwnProperty(COMMAND_MERGE)) {
+  if (hasOwnProperty.call(spec, COMMAND_MERGE)) {
     var mergeObj = spec[COMMAND_MERGE];
     ("production" !== process.env.NODE_ENV ? invariant(
       mergeObj && typeof mergeObj === 'object',
@@ -30156,21 +30230,21 @@ function update(value, spec) {
     assign(nextValue, spec[COMMAND_MERGE]);
   }
 
-  if (spec.hasOwnProperty(COMMAND_PUSH)) {
+  if (hasOwnProperty.call(spec, COMMAND_PUSH)) {
     invariantArrayCase(value, spec, COMMAND_PUSH);
     spec[COMMAND_PUSH].forEach(function(item) {
       nextValue.push(item);
     });
   }
 
-  if (spec.hasOwnProperty(COMMAND_UNSHIFT)) {
+  if (hasOwnProperty.call(spec, COMMAND_UNSHIFT)) {
     invariantArrayCase(value, spec, COMMAND_UNSHIFT);
     spec[COMMAND_UNSHIFT].forEach(function(item) {
       nextValue.unshift(item);
     });
   }
 
-  if (spec.hasOwnProperty(COMMAND_SPLICE)) {
+  if (hasOwnProperty.call(spec, COMMAND_SPLICE)) {
     ("production" !== process.env.NODE_ENV ? invariant(
       Array.isArray(value),
       'Expected %s target to be an array; got %s',
@@ -30196,7 +30270,7 @@ function update(value, spec) {
     });
   }
 
-  if (spec.hasOwnProperty(COMMAND_APPLY)) {
+  if (hasOwnProperty.call(spec, COMMAND_APPLY)) {
     ("production" !== process.env.NODE_ENV ? invariant(
       typeof spec[COMMAND_APPLY] === 'function',
       'update(): expected spec of %s to be a function; got %s.',
@@ -30291,22 +30365,109 @@ var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["defau
 
 var alt = _interopRequire(require("../flux/alt"));
 
-var DevActions = alt.generateActions("addDispatch", "addStores", "clearAll", "clearDispatches", "revert", "search", "selectRow", "selectStore", "toggleLogDispatch");
+var DevActions = alt.generateActions("addDispatch", "addStores", "clearAll", "clearDispatches", "replaceAlts", "revert", "search", "selectAlt", "selectRow", "selectStore", "toggleLogDispatch");
 
 module.exports = DevActions;
 
-},{"../flux/alt":252}],246:[function(require,module,exports){
+},{"../flux/alt":253}],246:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
+var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+var DevActions = _interopRequire(require("../actions/DevActions"));
+
+var React = _interopRequire(require("react"));
+
+var AltPickerView = (function (_React$Component) {
+  function AltPickerView() {
+    _classCallCheck(this, AltPickerView);
+
+    _get(Object.getPrototypeOf(AltPickerView.prototype), "constructor", this).call(this);
+
+    this.pickAlt = this.pickAlt.bind(this);
+  }
+
+  _inherits(AltPickerView, _React$Component);
+
+  _createClass(AltPickerView, {
+    refresh: {
+      value: function refresh() {
+        this.props.postMessage("REFRESH");
+      }
+    },
+    pickAlt: {
+      value: function pickAlt(ev) {
+        var selected = ev.target.value;
+        this.props.postMessage("SELECT_ALT", { id: selected });
+        DevActions.selectAlt(selected);
+      }
+    },
+    render: {
+      value: function render() {
+        var _this = this;
+
+        return React.createElement(
+          "div",
+          null,
+          React.createElement(
+            "span",
+            null,
+            "Alt:"
+          ),
+          React.createElement(
+            "select",
+            {
+              onChange: this.pickAlt,
+              style: { fontSize: "0.8em", height: "1.5em", margin: 0 }
+            },
+            this.props.alts.map(function (name, i) {
+              return React.createElement(
+                "option",
+                { key: i, value: i },
+                name
+              );
+            })
+          ),
+          " ",
+          React.createElement("i", { className: "fa fa-refresh", onClick: function () {
+              return _this.refresh();
+            } })
+        );
+      }
+    }
+  });
+
+  return AltPickerView;
+})(React.Component);
+
+module.exports = AltPickerView;
+
+},{"../actions/DevActions":245,"react":244}],247:[function(require,module,exports){
+"use strict";
+
+var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+
+var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
 var AltContainer = _interopRequire(require("alt/components/AltContainer"));
+
+var AltPickerView = _interopRequire(require("./AltPickerView.jsx"));
+
+var AltStore = _interopRequire(require("../stores/AltStore"));
 
 var DispatcherSearchStore = _interopRequire(require("../stores/DispatcherSearchStore"));
 
@@ -30324,9 +30485,9 @@ var App = (function (_React$Component) {
   function App() {
     _classCallCheck(this, App);
 
-    if (_React$Component != null) {
-      _React$Component.apply(this, arguments);
-    }
+    _get(Object.getPrototypeOf(App.prototype), "constructor", this).call(this);
+
+    this.postMessage = this.postMessage.bind(this);
   }
 
   _inherits(App, _React$Component);
@@ -30343,24 +30504,37 @@ var App = (function (_React$Component) {
     render: {
       value: function render() {
         return React.createElement(
-          Tabs,
-          null,
+          "div",
+          { style: { position: "relative" } },
           React.createElement(
-            Tabs.Panel,
-            { title: "Dispatches" },
+            Tabs,
+            null,
             React.createElement(
-              AltContainer,
-              { store: DispatcherSearchStore },
-              React.createElement(DispatcherView, { postMessage: this.postMessage.bind(this) })
+              Tabs.Panel,
+              { title: "Dispatches" },
+              React.createElement(
+                AltContainer,
+                { store: DispatcherSearchStore },
+                React.createElement(DispatcherView, { postMessage: this.postMessage })
+              )
+            ),
+            React.createElement(
+              Tabs.Panel,
+              { title: "Stores" },
+              React.createElement(
+                AltContainer,
+                { store: StoresStore },
+                React.createElement(StoresView, { postMessage: this.postMessage })
+              )
             )
           ),
           React.createElement(
-            Tabs.Panel,
-            { title: "Stores" },
+            "div",
+            { style: { position: "absolute", top: 0, right: 0 } },
             React.createElement(
               AltContainer,
-              { store: StoresStore },
-              React.createElement(StoresView, { postMessage: this.postMessage.bind(this) })
+              { store: AltStore },
+              React.createElement(AltPickerView, { postMessage: this.postMessage })
             )
           )
         );
@@ -30373,7 +30547,7 @@ var App = (function (_React$Component) {
 
 module.exports = App;
 
-},{"../stores/DispatcherSearchStore":253,"../stores/StoresStore":255,"./DispatcherView.jsx":248,"./StoresView.jsx":251,"alt/components/AltContainer":1,"react":244,"react-simpletabs":71}],247:[function(require,module,exports){
+},{"../stores/AltStore":254,"../stores/DispatcherSearchStore":255,"../stores/StoresStore":257,"./AltPickerView.jsx":246,"./DispatcherView.jsx":249,"./StoresView.jsx":252,"alt/components/AltContainer":1,"react":244,"react-simpletabs":71}],248:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -30522,7 +30696,7 @@ var Data = (function (_React$Component2) {
 
 module.exports = Data;
 
-},{"react":244}],248:[function(require,module,exports){
+},{"react":244}],249:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -30740,7 +30914,7 @@ var DispatcherView = (function (_React$Component) {
 
 module.exports = DispatcherView;
 
-},{"../actions/DevActions":245,"./Data.jsx":247,"./FauxTable.jsx":249,"./RecorderView.jsx":250,"fixed-data-table":69,"react":244}],249:[function(require,module,exports){
+},{"../actions/DevActions":245,"./Data.jsx":248,"./FauxTable.jsx":250,"./RecorderView.jsx":251,"fixed-data-table":69,"react":244}],250:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -30804,7 +30978,7 @@ var FauxTable = (function (_React$Component) {
 
 module.exports = FauxTable;
 
-},{"react":244}],250:[function(require,module,exports){
+},{"react":244}],251:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -30881,7 +31055,7 @@ var RecorderView = (function (_React$Component) {
 
 module.exports = RecorderView;
 
-},{"react":244}],251:[function(require,module,exports){
+},{"react":244}],252:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -31085,7 +31259,7 @@ var StoresView = (function (_React$Component) {
 
 module.exports = StoresView;
 
-},{"../actions/DevActions":245,"./Data.jsx":247,"./FauxTable.jsx":249,"fixed-data-table":69,"react":244}],252:[function(require,module,exports){
+},{"../actions/DevActions":245,"./Data.jsx":248,"./FauxTable.jsx":250,"fixed-data-table":69,"react":244}],253:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -31094,7 +31268,7 @@ var Alt = _interopRequire(require("alt"));
 
 module.exports = new Alt();
 
-},{"alt":4}],253:[function(require,module,exports){
+},{"alt":4}],254:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -31105,6 +31279,114 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
 
 var DevActions = _interopRequire(require("../actions/DevActions"));
 
+var alt = _interopRequire(require("../flux/alt"));
+
+var AltStore = (function () {
+  function AltStore() {
+    var _this = this;
+
+    _classCallCheck(this, AltStore);
+
+    this.alts = [];
+    this.dispatches = {};
+    this.stores = {};
+    this.selectedAlt = null;
+    this.logDispatches = true;
+
+    this.bindListeners({
+      addItem: DevActions.addDispatch,
+      addStores: DevActions.addStores,
+      clearAll: DevActions.clearAll,
+      clearDispatches: DevActions.clearDispatches,
+      replaceAlts: DevActions.replaceAlts,
+      selectAlt: DevActions.selectAlt,
+      toggleLogDispatch: DevActions.toggleLogDispatch
+    });
+
+    this.exportPublicMethods({
+      getDispatches: function () {
+        return _this.dispatches[_this.selectedAlt] || [];
+      },
+      getStores: function () {
+        return _this.stores[_this.selectedAlt] || [];
+      } });
+  }
+
+  _createClass(AltStore, {
+    addItem: {
+      value: function addItem(dispatch) {
+        if (!this.logDispatches) {
+          return false;
+        }
+
+        this.dispatches[dispatch.alt] = this.dispatches[dispatch.alt] || [];
+
+        var stores = this.stores[dispatch.alt] || [];
+
+        var dispatchedStores = stores.filter(function (x) {
+          return x.listeners.indexOf(dispatch.action) > -1;
+        }).map(function (x) {
+          return x.name;
+        }).join(", ");
+
+        this.dispatches[dispatch.alt].unshift(Object.assign({
+          stores: dispatchedStores
+        }, dispatch));
+
+        this.setState({ dispatches: this.dispatches });
+      }
+    },
+    addStores: {
+      value: function addStores(payload) {
+        this.stores[payload.alt] = payload.stores;
+      }
+    },
+    clearAll: {
+      value: function clearAll() {
+        this.dispatches = {};
+      }
+    },
+    clearDispatches: {
+      value: function clearDispatches() {
+        this.dispatches[this.selectedAlt] = [];
+      }
+    },
+    selectAlt: {
+      value: function selectAlt(id) {
+        this.selectedAlt = id;
+      }
+    },
+    replaceAlts: {
+      value: function replaceAlts(alts) {
+        this.selectedAlt = this.selectedAlt || 0;
+        this.alts = alts;
+      }
+    },
+    toggleLogDispatch: {
+      value: function toggleLogDispatch() {
+        this.logDispatches = !this.logDispatches;
+      }
+    }
+  });
+
+  return AltStore;
+})();
+
+module.exports = alt.createStore(AltStore, "AltStore");
+
+},{"../actions/DevActions":245,"../flux/alt":253}],255:[function(require,module,exports){
+"use strict";
+
+var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+
+var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+var AltStore = _interopRequire(require("./AltStore"));
+
+var DevActions = _interopRequire(require("../actions/DevActions"));
+
 var DispatcherStore = _interopRequire(require("./DispatcherStore"));
 
 var alt = _interopRequire(require("../flux/alt"));
@@ -31112,55 +31394,47 @@ var alt = _interopRequire(require("../flux/alt"));
 var stringScore = _interopRequire(require("../utils/stringScore"));
 
 var DispatcherSearchStore = (function () {
+  //  static displayName = 'DispatcherSearchStore'
+
   function DispatcherSearchStore() {
+    var _this = this;
+
     _classCallCheck(this, DispatcherSearchStore);
 
     this.dispatches = [];
-    this.logDispatches = DispatcherStore.getState().logDispatches;
     this.revertId = null;
     this.searchValue = "";
     this.selectedPayload = {};
 
+    this.alt.dispatcher.register(function () {
+      _this.waitFor(AltStore, DispatcherStore);
+
+      var _AltStore$getState = AltStore.getState();
+
+      var logDispatches = _AltStore$getState.logDispatches;
+
+      if (!logDispatches) return;
+
+      _this.updateSearch(_this.searchValue);
+
+      // XXX ugh manually emitting a change sucks.
+      // I need a way to listen to all actions and auto emit change.
+      _this.emitChange();
+    });
+
     this.bindListeners({
-      addItem: DevActions.addDispatch,
-      clearAll: DevActions.clearAll,
-      clearDispatches: DevActions.clearDispatches,
+      clearAll: [DevActions.clearAll, DevActions.clearDispatches],
       revert: DevActions.revert,
       search: DevActions.search,
-      select: DevActions.selectRow,
-      toggleLogDispatch: DevActions.toggleLogDispatch
-    });
+      select: DevActions.selectRow });
   }
 
   _createClass(DispatcherSearchStore, {
-    beforeEach: {
-      value: function beforeEach() {
-        this.waitFor(DispatcherStore);
-      }
-    },
-    addItem: {
-      value: function addItem() {
-        var _DispatcherStore$getState = DispatcherStore.getState();
-
-        var logDispatches = _DispatcherStore$getState.logDispatches;
-
-        if (!logDispatches) {
-          return false;
-        }
-
-        return this.updateSearch(this.searchValue);
-      }
-    },
     clearAll: {
       value: function clearAll() {
         this.dispatches = [];
         this.searchValue = "";
         this.selectedPayload = {};
-      }
-    },
-    clearDispatches: {
-      value: function clearDispatches() {
-        this.clearAll();
       }
     },
     revert: {
@@ -31170,7 +31444,7 @@ var DispatcherSearchStore = (function () {
     },
     search: {
       value: function search(searchValue) {
-        return this.updateSearch(searchValue);
+        this.updateSearch(searchValue);
       }
     },
     select: {
@@ -31179,11 +31453,6 @@ var DispatcherSearchStore = (function () {
           action: payload.action,
           data: payload.data
         };
-      }
-    },
-    toggleLogDispatch: {
-      value: function toggleLogDispatch() {
-        this.logDispatches = DispatcherStore.getState().logDispatches;
       }
     },
     updateSearch: {
@@ -31195,10 +31464,11 @@ var DispatcherSearchStore = (function () {
         var dispatches = _DispatcherStore$getState.dispatches;
 
         if (!searchValue.trim()) {
-          return this.setState({
+          this.setState({
             dispatches: dispatches,
             searchValue: searchValue
           });
+          return;
         }
 
         var filteredDispatches = dispatches.filter(function (dispatch) {
@@ -31209,7 +31479,7 @@ var DispatcherSearchStore = (function () {
           return dispatch.data === _this.selectedPayload.data ? dispatch : obj;
         }, {});
 
-        return this.setState({
+        this.setState({
           dispatches: filteredDispatches,
           searchValue: searchValue,
           selectedPayload: selectedPayload
@@ -31221,83 +31491,47 @@ var DispatcherSearchStore = (function () {
   return DispatcherSearchStore;
 })();
 
-module.exports = alt.createStore(DispatcherSearchStore, "DispatcherSearchStore");
+module.exports = alt.createStore(DispatcherSearchStore);
 
-},{"../actions/DevActions":245,"../flux/alt":252,"../utils/stringScore":256,"./DispatcherStore":254}],254:[function(require,module,exports){
+},{"../actions/DevActions":245,"../flux/alt":253,"../utils/stringScore":258,"./AltStore":254,"./DispatcherStore":256}],256:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 
-var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
-var DevActions = _interopRequire(require("../actions/DevActions"));
-
-var StoresStore = _interopRequire(require("./StoresStore"));
+var AltStore = _interopRequire(require("./AltStore"));
 
 var alt = _interopRequire(require("../flux/alt"));
 
-var DispatcherStore = (function () {
-  function DispatcherStore() {
-    _classCallCheck(this, DispatcherStore);
+// XXX this can be a simpler store, we really just want to reduce on every action and make sure
+// the dispatches match.
+//
+// XXX maybe some microflux would help here...
 
-    this.dispatches = [];
-    this.logDispatches = true;
+var DispatcherStore =
+//  static displayName = 'DispatcherStore'
 
-    this.bindListeners({
-      addItem: DevActions.addDispatch,
-      clearAll: DevActions.clearAll,
-      clearDispatches: DevActions.clearDispatches,
-      toggleLogDispatch: DevActions.toggleLogDispatch
-    });
-  }
+function DispatcherStore() {
+  var _this = this;
 
-  _createClass(DispatcherStore, {
-    addItem: {
-      value: function addItem(dispatch) {
-        if (!this.logDispatches) {
-          return false;
-        }
+  _classCallCheck(this, DispatcherStore);
 
-        var _StoresStore$getState = StoresStore.getState();
+  this.dispatches = [];
 
-        var stores = _StoresStore$getState.stores;
+  this.alt.dispatcher.register(function () {
+    _this.waitFor(AltStore);
 
-        var dispatchedStores = stores.filter(function (x) {
-          return x.listeners.indexOf(dispatch.action) > -1;
-        }).map(function (x) {
-          return x.name;
-        }).join(", ");
+    _this.dispatches = AltStore.getDispatches();
 
-        this.dispatches.unshift(Object.assign({
-          stores: dispatchedStores
-        }, dispatch));
-      }
-    },
-    clearAll: {
-      value: function clearAll() {
-        this.dispatches = [];
-      }
-    },
-    clearDispatches: {
-      value: function clearDispatches() {
-        this.clearAll();
-      }
-    },
-    toggleLogDispatch: {
-      value: function toggleLogDispatch() {
-        this.logDispatches = !this.logDispatches;
-      }
-    }
+    // XXX I could shallow equals here to make sure things changed before emitting...
+    _this.emitChange();
   });
+};
 
-  return DispatcherStore;
-})();
+module.exports = alt.createStore(DispatcherStore);
 
-module.exports = alt.createStore(DispatcherStore, "DispatcherStore");
-
-},{"../actions/DevActions":245,"../flux/alt":252,"./StoresStore":255}],255:[function(require,module,exports){
+},{"../flux/alt":253,"./AltStore":254}],257:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -31309,36 +31543,51 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
 var DevActions = _interopRequire(require("../actions/DevActions"));
 
 var alt = _interopRequire(require("../flux/alt"));
+
+var AltStore = _interopRequire(require("../stores/AltStore"));
+
+// XXX ideally I'd have two reducers:
+// one for selectedStore
+// and one for the stores
+//
+// and then something that combines both of those.
+// we actually only need 2 stores, selectedStore, and combo of that + AltStore.getStores.
+// alt needs reducers. Imma try this with microflux.
+//
+// one intermediate solution is to have a this.on('dispatch') lifecycle which auto triggers a change event?
+// or something that allows you to listen to all and auto triggers change events.
 
 var StoresStore = (function () {
+  //  static displayName = 'StoresStore'
+
   function StoresStore() {
+    var _this = this;
+
     _classCallCheck(this, StoresStore);
 
     this.selectedStore = null;
     this.stores = [];
 
-    this.bindListeners({
-      addStores: DevActions.addStores,
-      clearAll: DevActions.clearAll,
-      selectStore: DevActions.selectStore
+    this.dispatcher.register(function () {
+      _this.stores = AltStore.getStores();
+      _this.emitChange();
     });
+
+    this.bindListeners({
+      clearAll: DevActions.clearAll,
+      selectAlt: DevActions.selectAlt,
+      selectStore: DevActions.selectStore });
   }
 
   _createClass(StoresStore, {
-    addStores: {
-      value: function addStores(stores) {
-        var selectedStore = this.selectedStore === null ? this.stores.length ? 0 : null : this.selectedStore;
-
-        return this.setState({
-          selectedStore: selectedStore,
-          stores: stores
-        });
+    selectAlt: {
+      value: function selectAlt() {
+        this.selectedStore = null;
       }
     },
     clearAll: {
       value: function clearAll() {
         this.selectedStore = null;
-        this.stores = [];
       }
     },
     selectStore: {
@@ -31351,9 +31600,9 @@ var StoresStore = (function () {
   return StoresStore;
 })();
 
-module.exports = alt.createStore(StoresStore, "StoresStore");
+module.exports = alt.createStore(StoresStore);
 
-},{"../actions/DevActions":245,"../flux/alt":252}],256:[function(require,module,exports){
+},{"../actions/DevActions":245,"../flux/alt":253,"../stores/AltStore":254}],258:[function(require,module,exports){
 /*!
  * string_score.js: String Scoring Algorithm 0.1.22
  *
@@ -31478,7 +31727,7 @@ function score(string, word, fuzziness) {
 
 module.exports = score;
 
-},{}],257:[function(require,module,exports){
+},{}],259:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -31502,10 +31751,12 @@ var backgroundPageConnection = chrome.runtime.connect({
 
 backgroundPageConnection.onMessage.addListener(function (message) {
   switch (message.type) {
+    case "ALT":
+      return DevActions.replaceAlts(message.payload.alts);
     case "DISPATCH":
       return DevActions.addDispatch(message.payload);
     case "STORES":
-      return DevActions.addStores(message.payload.stores);
+      return DevActions.addStores(message.payload);
     case "PAGE_UNLOADED":
       return DevActions.clearAll();
     default:
@@ -31520,4 +31771,4 @@ backgroundPageConnection.postMessage({
 
 React.render(React.createElement(App, { connection: backgroundPageConnection }), document.getElementById("alt-devtool"));
 
-},{"./actions/DevActions":245,"./components/App.jsx":246,"alt":4,"object-assign":70,"react":244}]},{},[257]);
+},{"./actions/DevActions":245,"./components/App.jsx":247,"alt":4,"object-assign":70,"react":244}]},{},[259]);
