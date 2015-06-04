@@ -1,9 +1,11 @@
-import getAlt from './alt'
+import alts from './alts'
 import makeFinalStore from 'alt/utils/makeFinalStore'
 import post from './post'
 import parseStores from './parseStores'
+import getStoreData from './getStoreData'
 import uid from './uid'
 
+let listeners = []
 const snapshots = {}
 
 // handle messages from the hook
@@ -21,31 +23,34 @@ function onMessageFromHook(event) {
   const { action, data } = message.payload
 
   switch (action) {
+    case 'SELECT_ALT':
+      alts.switch(data.id)
+      post('ALT', {
+        alts: alts.all().map(x => x.name)
+      })
+    return
+    case 'REFRESH':
+      registerAlt()
+    return
     case 'SNAPSHOT':
-      console.log(getAlt().takeSnapshot())
+      console.log(alts.get().takeSnapshot())
     return
     case 'FLUSH':
-      console.log(getAlt().flush())
-      post('STORES', {
-        stores: parseStores()
-      })
+      console.log(alts.get().flush())
+      parseStores().forEach(data => post('STORES', data))
     return
     case 'RECYCLE_STORE':
-      getAlt().recycle(data.storeName)
-      post('STORES', {
-        stores: parseStores()
-      })
+      alts.get().recycle(data.storeName)
+      parseStores().forEach(data => post('STORES', data))
     return
     case 'REVERT':
       if (snapshots[data.id]) {
-        getAlt().bootstrap(snapshots[data.id])
-        post('STORES', {
-          stores: parseStores()
-        })
+        alts.get().bootstrap(snapshots[data.id])
+        parseStores().forEach(data => post('STORES', data))
       }
     case 'BOOTSTRAP':
       if (data.bootstrapData) {
-        getAlt().bootstrap(data.bootstrapData)
+        alts.get().bootstrap(data.bootstrapData)
       }
     return
     return
@@ -68,26 +73,67 @@ function onMessageFromHook(event) {
 window.addEventListener('message', onMessageFromHook)
 
 function registerAlt() {
-  post('STORES', {
-    stores: parseStores()
+  listeners.forEach(x => x.destroy())
+
+  // initial post of alts
+  post('ALT', {
+    alts: alts.all().map(x => x.name)
   })
 
-  const finalStore = makeFinalStore(getAlt())
+  parseStores().forEach(data => post('STORES', data))
 
-  finalStore.listen(function ({ payload }) {
-    const id = uid()
+  listeners = alts.all().map((obj, i) => {
+    const alt = obj.alt
 
-    post('STORES', {
-      stores: parseStores()
+    // create our state container for each store
+    const altStores = alt.deserialize(alt.takeSnapshot())
+    const stores = Object.keys(altStores).reduce((obj, storeName) => {
+      obj[storeName] = getStoreData(alt.stores[storeName], altStores[storeName])
+      return obj
+    }, {})
+
+    // store listeners for when each store changes
+    const storeListeners = Object.keys(alt.stores).map((storeName) => {
+      const store = alt.stores[storeName]
+
+      function mapState(state) {
+        return store.config.onSerialize
+          ? store.config.onSerialize(state)
+          : state
+      }
+
+      return store.listen((nextState) => {
+        stores[storeName] = getStoreData(store, mapState(nextState))
+      })
     })
 
-    post('DISPATCH', {
-      id: id,
-      action: Symbol.keyFor(payload.action),
-      data: payload.data
+    // the final store for dispatch
+    const finalStore = makeFinalStore(alt)
+
+    const listener = finalStore.listen(function ({ payload }) {
+      const id = uid()
+
+      post('STORES', {
+        alt: i,
+        stores: Object.keys(stores).map(name => stores[name])
+      })
+
+      post('DISPATCH', {
+        alt: i,
+        id: id,
+        action: Symbol.keyFor(payload.action),
+        data: payload.data
+      })
+
+      snapshots[id] = alt.takeSnapshot()
     })
 
-    snapshots[id] = getAlt().takeSnapshot()
+    return {
+      destroy() {
+        storeListeners.forEach(f => f())
+        listener()
+      }
+    }
   })
 }
 

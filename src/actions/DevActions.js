@@ -5,8 +5,10 @@ const DevActions = alt.generateActions(
   'addStores',
   'clearAll',
   'clearDispatches',
+  'replaceAlts',
   'revert',
   'search',
+  'selectAlt',
   'selectRow',
   'selectStore',
   'toggleLogDispatch'

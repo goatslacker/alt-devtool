@@ -1,37 +1,36 @@
 import DevActions from '../actions/DevActions'
 import alt from '../flux/alt'
+import AltStore from '../stores/AltStore'
 
 class StoresStore {
+//  static displayName = 'StoresStore'
+
   constructor() {
     this.selectedStore = null
     this.stores = []
 
     this.bindListeners({
-      addStores: DevActions.addStores,
       clearAll: DevActions.clearAll,
-      selectStore: DevActions.selectStore
+      selectAlt: DevActions.selectAlt,
+      selectStore: DevActions.selectStore,
     })
   }
 
-  addStores(stores) {
-    const selectedStore = this.selectedStore === null
-      ? this.stores.length ? 0 : null
-      : this.selectedStore
-
-    return this.setState({
-      selectedStore,
-      stores
-    })
+  selectAlt() {
+    this.selectedStore = null
   }
 
   clearAll() {
     this.selectedStore = null
-    this.stores = []
   }
 
   selectStore(id) {
     this.selectedStore = id
   }
+
+  otherwise() {
+    this.stores = AltStore.getStores()
+  }
 }
 
-export default alt.createStore(StoresStore, 'StoresStore')
+export default alt.createStore(StoresStore)

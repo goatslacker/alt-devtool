@@ -61,18 +61,35 @@ findAlt(100);
 },{"./utils/findAlt":4}],3:[function(require,module,exports){
 "use strict";
 
-module.exports = getAlt;
+var idx = 0;
 
-function getAlt() {
-  return window["goatslacker.github.io/alt/"] || window["alt.js.org"];
-}
+var alts = {
+  "switch": function _switch(i) {
+    idx = i;
+  },
+
+  all: function all() {
+    return window["goatslacker.github.io/alt/"] || window["alt.js.org"];
+  },
+
+  get: function get() {
+    var all = alts.all();
+    if (all) {
+      return Array.isArray(all) ? all[idx].alt : all;
+    }
+
+    return null;
+  }
+};
+
+module.exports = alts;
 
 },{}],4:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 
-var getAlt = _interopRequire(require("./alt"));
+var alts = _interopRequire(require("./alts"));
 
 var registerAlt = _interopRequire(require("./registerAlt"));
 
@@ -83,7 +100,7 @@ function poke(time) {
     return;
   }
 
-  if (getAlt()) {
+  if (alts.get()) {
     registerAlt();
   } else {
     setTimeout(function () {
@@ -94,28 +111,44 @@ function poke(time) {
 
 module.exports = poke;
 
-},{"./alt":3,"./registerAlt":7}],5:[function(require,module,exports){
+},{"./alts":3,"./registerAlt":8}],5:[function(require,module,exports){
+"use strict";
+
+module.exports = getStoreData;
+
+function getStoreData(store, state) {
+  return {
+    name: store.displayName,
+    state: JSON.stringify(state),
+    dispatchId: store.dispatchToken,
+    listeners: store.boundListeners
+  };
+}
+
+},{}],6:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 
-var getAlt = _interopRequire(require("./alt"));
+module.exports = parseStores;
+
+var alts = _interopRequire(require("./alts"));
+
+var getStoreData = _interopRequire(require("./getStoreData"));
 
 function parseStores() {
-  return Object.keys(getAlt().stores).map(function (storeName) {
-    var store = getAlt().stores[storeName];
-    return {
-      name: storeName,
-      state: JSON.stringify(store.getState()),
-      dispatchId: store.dispatchToken,
-      listeners: store.boundListeners
-    };
+  return alts.all().map(function (obj, i) {
+    var alt = obj.alt;
+    var stores = Object.keys(alt.stores).map(function (storeName) {
+      var store = alt.stores[storeName];
+      return getStoreData(store, alt.takeSnapshot(store));
+    }, {});
+
+    return { alt: i, stores: stores };
   });
 }
 
-module.exports = parseStores;
-
-},{"./alt":3}],6:[function(require,module,exports){
+},{"./alts":3,"./getStoreData":5}],7:[function(require,module,exports){
 "use strict";
 
 function post(type, payload) {
@@ -128,12 +161,12 @@ function post(type, payload) {
 
 module.exports = post;
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 
-var getAlt = _interopRequire(require("./alt"));
+var alts = _interopRequire(require("./alts"));
 
 var makeFinalStore = _interopRequire(require("alt/utils/makeFinalStore"));
 
@@ -141,8 +174,11 @@ var post = _interopRequire(require("./post"));
 
 var parseStores = _interopRequire(require("./parseStores"));
 
+var getStoreData = _interopRequire(require("./getStoreData"));
+
 var uid = _interopRequire(require("./uid"));
 
+var listeners = [];
 var snapshots = {};
 
 // handle messages from the hook
@@ -162,31 +198,42 @@ function onMessageFromHook(event) {
   var data = _message$payload.data;
 
   switch (action) {
+    case "SELECT_ALT":
+      alts["switch"](data.id);
+      post("ALT", {
+        alts: alts.all().map(function (x) {
+          return x.name;
+        })
+      });
+      return;
+    case "REFRESH":
+      registerAlt();
+      return;
     case "SNAPSHOT":
-      console.log(getAlt().takeSnapshot());
+      console.log(alts.get().takeSnapshot());
       return;
     case "FLUSH":
-      console.log(getAlt().flush());
-      post("STORES", {
-        stores: parseStores()
+      console.log(alts.get().flush());
+      parseStores().forEach(function (data) {
+        return post("STORES", data);
       });
       return;
     case "RECYCLE_STORE":
-      getAlt().recycle(data.storeName);
-      post("STORES", {
-        stores: parseStores()
+      alts.get().recycle(data.storeName);
+      parseStores().forEach(function (data) {
+        return post("STORES", data);
       });
       return;
     case "REVERT":
       if (snapshots[data.id]) {
-        getAlt().bootstrap(snapshots[data.id]);
-        post("STORES", {
-          stores: parseStores()
+        alts.get().bootstrap(snapshots[data.id]);
+        parseStores().forEach(function (data) {
+          return post("STORES", data);
         });
       }
     case "BOOTSTRAP":
       if (data.bootstrapData) {
-        getAlt().bootstrap(data.bootstrapData);
+        alts.get().bootstrap(data.bootstrapData);
       }
       return;
       return;
@@ -209,38 +256,87 @@ function onMessageFromHook(event) {
 window.addEventListener("message", onMessageFromHook);
 
 function registerAlt() {
-  post("STORES", {
-    stores: parseStores()
+  listeners.forEach(function (x) {
+    return x.destroy();
   });
 
-  var finalStore = makeFinalStore(getAlt());
+  // initial post of alts
+  post("ALT", {
+    alts: alts.all().map(function (x) {
+      return x.name;
+    })
+  });
 
-  finalStore.listen(function (_ref) {
-    var payload = _ref.payload;
+  parseStores().forEach(function (data) {
+    return post("STORES", data);
+  });
 
-    var id = uid();
+  listeners = alts.all().map(function (obj, i) {
+    var alt = obj.alt;
 
-    post("STORES", {
-      stores: parseStores()
+    // create our state container for each store
+    var altStores = alt.deserialize(alt.takeSnapshot());
+    var stores = Object.keys(altStores).reduce(function (obj, storeName) {
+      obj[storeName] = getStoreData(alt.stores[storeName], altStores[storeName]);
+      return obj;
+    }, {});
+
+    // store listeners for when each store changes
+    var storeListeners = Object.keys(alt.stores).map(function (storeName) {
+      var store = alt.stores[storeName];
+
+      function mapState(state) {
+        return store.config.onSerialize ? store.config.onSerialize(state) : state;
+      }
+
+      return store.listen(function (nextState) {
+        stores[storeName] = getStoreData(store, mapState(nextState));
+      });
     });
 
-    post("DISPATCH", {
-      id: id,
-      action: Symbol.keyFor(payload.action),
-      data: payload.data
+    // the final store for dispatch
+    var finalStore = makeFinalStore(alt);
+
+    var listener = finalStore.listen(function (_ref) {
+      var payload = _ref.payload;
+
+      var id = uid();
+
+      post("STORES", {
+        alt: i,
+        stores: Object.keys(stores).map(function (name) {
+          return stores[name];
+        })
+      });
+
+      post("DISPATCH", {
+        alt: i,
+        id: id,
+        action: Symbol.keyFor(payload.action),
+        data: payload.data
+      });
+
+      snapshots[id] = alt.takeSnapshot();
     });
 
-    snapshots[id] = getAlt().takeSnapshot();
+    return {
+      destroy: function destroy() {
+        storeListeners.forEach(function (f) {
+          return f();
+        });
+        listener();
+      }
+    };
   });
 }
 
 module.exports = registerAlt;
 
-},{"./alt":3,"./parseStores":5,"./post":6,"./uid":8,"alt/utils/makeFinalStore":1}],8:[function(require,module,exports){
+},{"./alts":3,"./getStoreData":5,"./parseStores":6,"./post":7,"./uid":9,"alt/utils/makeFinalStore":1}],9:[function(require,module,exports){
 "use strict";
 
 function uid() {
-  return (Date.now() * Math.random()).toString(35).substr(0, 7);
+  return (Date.now() * Math.random()).toString(35).substr(0, 16);
 }
 
 module.exports = uid;

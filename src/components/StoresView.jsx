@@ -23,6 +23,7 @@ class StoresView extends React.Component {
   }
 
   getStoreState() {
+    // XXX make sure this works with other serialized formats
     return this.props.selectedStore === null
       ? {}
       : JSON.parse(this.props.stores[this.props.selectedStore].state)
