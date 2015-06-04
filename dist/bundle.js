@@ -268,6 +268,10 @@ var _esSymbol = require('es-symbol');
 
 var _esSymbol2 = _interopRequireDefault(_esSymbol);
 
+var _utilsFunctions = require('../../utils/functions');
+
+var fn = _interopRequireWildcard(_utilsFunctions);
+
 var _symbolsSymbols = require('../symbols/symbols');
 
 var Sym = _interopRequireWildcard(_symbolsSymbols);
@@ -285,11 +289,13 @@ var AltAction = (function () {
     this.actions = actions;
     this.actionDetails = actionDetails;
     this.alt = alt;
+    this.dispatched = false;
   }
 
   _createClass(AltAction, [{
     key: 'dispatch',
     value: function dispatch(data) {
+      this.dispatched = true;
       this.alt.dispatch(this[Sym.ACTION_UID], data, this.actionDetails);
     }
   }]);
@@ -313,11 +319,30 @@ function makeAction(alt, namespace, name, implementation, obj) {
   // Wrap the action so we can provide a dispatch method
   var newAction = new AltAction(alt, actionSymbol, implementation, obj, data);
 
+  var dispatch = function dispatch(payload) {
+    return alt.dispatch(actionSymbol, payload, data);
+  };
+
   // the action itself
-  var action = newAction[Sym.ACTION_HANDLER];
-  action.defer = function () {
+  var action = function action() {
     for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
       args[_key] = arguments[_key];
+    }
+
+    newAction.dispatched = false;
+    var result = newAction[Sym.ACTION_HANDLER].apply(newAction, args);
+    if (!newAction.dispatched) {
+      if (fn.isFunction(result)) {
+        result(dispatch);
+      } else {
+        dispatch(result);
+      }
+    }
+    return result;
+  };
+  action.defer = function () {
+    for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      args[_key2] = arguments[_key2];
     }
 
     setTimeout(function () {
@@ -336,7 +361,8 @@ function makeAction(alt, namespace, name, implementation, obj) {
 }
 
 module.exports = exports['default'];
-},{"../symbols/symbols":8,"../utils/AltUtils":9,"es-symbol":12}],4:[function(require,module,exports){
+},{"../../utils/functions":17,"../symbols/symbols":8,"../utils/AltUtils":9,"es-symbol":12}],4:[function(require,module,exports){
+/*global window*/
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -392,6 +418,9 @@ var Alt = (function () {
     this.serialize = config.serialize || JSON.stringify;
     this.deserialize = config.deserialize || JSON.parse;
     this.dispatcher = config.dispatcher || new _flux.Dispatcher();
+    this.batchingFunction = config.batchingFunction || function (callback) {
+      return callback();
+    };
     this.actions = { global: {} };
     this.stores = {};
     this.storeTransforms = config.storeTransforms || [];
@@ -403,7 +432,11 @@ var Alt = (function () {
   _createClass(Alt, [{
     key: 'dispatch',
     value: function dispatch(action, data, details) {
-      this.dispatcher.dispatch({ action: action, data: data, details: details });
+      var _this = this;
+
+      this.batchingFunction(function () {
+        return _this.dispatcher.dispatch({ action: action, data: data, details: details });
+      });
     }
   }, {
     key: 'createUnsavedStore',
@@ -471,7 +504,7 @@ var Alt = (function () {
         argsForConstructor[_key4 - 2] = arguments[_key4];
       }
 
-      var _this = this;
+      var _this2 = this;
 
       var exportObj = arguments[1] === undefined ? {} : arguments[1];
 
@@ -525,7 +558,7 @@ var Alt = (function () {
         }
 
         // create the action
-        exportObj[actionName] = (0, _actions2['default'])(_this, key, actionName, action, exportObj);
+        exportObj[actionName] = (0, _actions2['default'])(_this2, key, actionName, action, exportObj);
 
         // generate a constant
         var constant = utils.formatAsConstant(actionName);
@@ -622,6 +655,16 @@ var Alt = (function () {
     value: function getStore(name) {
       return this.stores[name];
     }
+  }], [{
+    key: 'debug',
+    value: function debug(name, alt) {
+      var key = 'alt.js.org';
+      if (typeof window !== 'undefined') {
+        window[key] = window[key] || [];
+        window[key].push({ name: name, alt: alt });
+      }
+      return alt;
+    }
   }]);
 
   return Alt;
@@ -673,32 +716,55 @@ var AltStore = (function () {
     this[Sym.LIFECYCLE] = model[Sym.LIFECYCLE];
     this[Sym.STATE_CONTAINER] = state || model;
 
+    this.preventDefault = false;
     this._storeName = model._storeName;
     this.boundListeners = model[Sym.ALL_LISTENERS];
     this.StoreModel = StoreModel;
+
+    var output = model.output || function (x) {
+      return x;
+    };
+
+    this.emitChange = function () {
+      _this[EE].emit('change', output.call(model, _this[Sym.STATE_CONTAINER]));
+    };
+
+    var handleDispatch = function handleDispatch(f, payload) {
+      try {
+        return f();
+      } catch (e) {
+        if (model[Sym.HANDLING_ERRORS]) {
+          _this[Sym.LIFECYCLE].emit('error', e, payload, _this[Sym.STATE_CONTAINER]);
+          return false;
+        } else {
+          throw e;
+        }
+      }
+    };
 
     fn.assign(this, model[Sym.PUBLIC_METHODS]);
 
     // Register dispatcher
     this.dispatchToken = alt.dispatcher.register(function (payload) {
+      _this.preventDefault = false;
       _this[Sym.LIFECYCLE].emit('beforeEach', payload, _this[Sym.STATE_CONTAINER]);
 
-      if (model[Sym.LISTENERS][payload.action]) {
-        var result = false;
+      var actionHandler = model[Sym.LISTENERS][payload.action] || model.otherwise;
 
-        try {
-          result = model[Sym.LISTENERS][payload.action](payload.data);
-        } catch (e) {
-          if (model[Sym.HANDLING_ERRORS]) {
-            _this[Sym.LIFECYCLE].emit('error', e, payload, _this[Sym.STATE_CONTAINER]);
-          } else {
-            throw e;
-          }
-        }
+      if (actionHandler) {
+        var result = handleDispatch(function () {
+          return actionHandler.call(model, payload.data, payload.action);
+        }, payload);
 
-        if (result !== false) {
-          _this.emitChange();
-        }
+        if (result !== false && !_this.preventDefault) _this.emitChange();
+      }
+
+      if (model.reduce) {
+        handleDispatch(function () {
+          model.setState(model.reduce(_this[Sym.STATE_CONTAINER], payload));
+        }, payload);
+
+        if (!_this.preventDefault) _this.emitChange();
       }
 
       _this[Sym.LIFECYCLE].emit('afterEach', payload, _this[Sym.STATE_CONTAINER]);
@@ -711,11 +777,6 @@ var AltStore = (function () {
     key: 'getEventEmitter',
     value: function getEventEmitter() {
       return this[EE];
-    }
-  }, {
-    key: 'emitChange',
-    value: function emitChange() {
-      this[EE].emit('change', this[Sym.STATE_CONTAINER]);
     }
   }, {
     key: 'listen',
@@ -819,20 +880,29 @@ var StoreMixin = {
 
         var state = _this.getInstance().getState();
         var value = spec.local && spec.local.apply(spec, [state].concat(args));
-        var shouldFetch = spec.shouldFetch ? spec.shouldFetch.apply(spec, [state].concat(args)) : !value;
+        var shouldFetch = spec.shouldFetch ? spec.shouldFetch.apply(spec, [state].concat(args)) : value == null;
+        var intercept = spec.interceptResponse || function (x) {
+          return x;
+        };
+
+        var makeActionHandler = function makeActionHandler(action) {
+          return function (x) {
+            var fire = function fire() {
+              loadCounter -= 1;
+              action(intercept(x, action, args));
+            };
+            return typeof window === 'undefined' ? function () {
+              return fire();
+            } : fire();
+          };
+        };
 
         // if we don't have it in cache then fetch it
         if (shouldFetch) {
           loadCounter += 1;
           /* istanbul ignore else */
-          if (spec.loading) spec.loading();
-          spec.remote.apply(spec, [state].concat(args)).then(function (v) {
-            loadCounter -= 1;
-            spec.success(v);
-          })['catch'](function (v) {
-            loadCounter -= 1;
-            spec.error(v);
-          });
+          if (spec.loading) spec.loading(intercept(null, spec.loading, args));
+          return spec.remote.apply(spec, [state].concat(args)).then(makeActionHandler(spec.success))['catch'](makeActionHandler(spec.error));
         } else {
           // otherwise emit the change now
           _this.emitChange();
@@ -1013,7 +1083,10 @@ function createPrototype(proto, alt, key, extras) {
   return fn.assign(proto, _StoreMixin2['default'], {
     _storeName: key,
     alt: alt,
-    dispatcher: alt.dispatcher
+    dispatcher: alt.dispatcher,
+    preventDefault: function preventDefault() {
+      this.getInstance().preventDefault = true;
+    }
   }, extras);
 }
 
@@ -1049,6 +1122,10 @@ function createStoreFromObject(alt, StoreModel, key) {
   if (StoreProto.bindListeners) {
     _StoreMixin2['default'].bindListeners.call(StoreProto, StoreProto.bindListeners);
   }
+  /* istanbul ignore else */
+  if (StoreProto.observe) {
+    _StoreMixin2['default'].bindListeners.call(StoreProto, StoreProto.observe(alt));
+  }
 
   // bind the lifecycle events
   /* istanbul ignore else */
@@ -1059,7 +1136,7 @@ function createStoreFromObject(alt, StoreModel, key) {
   }
 
   // create the instance and fn.assign the public methods to the instance
-  storeInstance = fn.assign(new _AltStore2['default'](alt, StoreProto, StoreProto.state, StoreModel), StoreProto.publicMethods, { displayName: key });
+  storeInstance = fn.assign(new _AltStore2['default'](alt, StoreProto, StoreProto.state || {}, StoreModel), StoreProto.publicMethods, { displayName: key });
 
   return storeInstance;
 }
@@ -1103,13 +1180,8 @@ function createStoreFromClass(alt, StoreModel, key) {
 
   var store = new (_bind.apply(Store, [null].concat(argsForClass)))();
 
-  if (config.bindListeners) {
-    store.bindListeners(config.bindListeners);
-  }
-
-  if (config.datasource) {
-    store.exportAsync(config.datasource);
-  }
+  if (config.bindListeners) store.bindListeners(config.bindListeners);
+  if (config.datasource) store.registerAsync(config.datasource);
 
   storeInstance = fn.assign(new _AltStore2['default'](alt, store, store[alt.config.stateKey] || store[config.stateKey] || null, StoreModel), utils.getInternalMethods(StoreModel), config.publicMethods, { displayName: key });
 
@@ -1260,17 +1332,13 @@ function setAppState(instance, data, onStore) {
   fn.eachObject(function (key, value) {
     var store = instance.stores[key];
     if (store) {
-      (function () {
-        var config = store.StoreModel.config;
+      var config = store.StoreModel.config;
 
-        var state = store[Sym.STATE_CONTAINER];
-        if (config.onDeserialize) obj[key] = config.onDeserialize(value) || value;
-        fn.eachObject(function (k) {
-          return delete state[k];
-        }, [state]);
-        fn.assign(state, obj[key]);
-        onStore(store);
-      })();
+      if (config.onDeserialize) {
+        obj[key] = config.onDeserialize(value) || value;
+      }
+      fn.assign(store[Sym.STATE_CONTAINER], obj[key]);
+      onStore(store);
     }
   }, [obj]);
 }
@@ -31397,30 +31465,12 @@ var DispatcherSearchStore = (function () {
   //  static displayName = 'DispatcherSearchStore'
 
   function DispatcherSearchStore() {
-    var _this = this;
-
     _classCallCheck(this, DispatcherSearchStore);
 
     this.dispatches = [];
     this.revertId = null;
     this.searchValue = "";
     this.selectedPayload = {};
-
-    this.alt.dispatcher.register(function () {
-      _this.waitFor(AltStore, DispatcherStore);
-
-      var _AltStore$getState = AltStore.getState();
-
-      var logDispatches = _AltStore$getState.logDispatches;
-
-      if (!logDispatches) return;
-
-      _this.updateSearch(_this.searchValue);
-
-      // XXX ugh manually emitting a change sucks.
-      // I need a way to listen to all actions and auto emit change.
-      _this.emitChange();
-    });
 
     this.bindListeners({
       clearAll: [DevActions.clearAll, DevActions.clearDispatches],
@@ -31453,6 +31503,19 @@ var DispatcherSearchStore = (function () {
           action: payload.action,
           data: payload.data
         };
+      }
+    },
+    otherwise: {
+      value: function otherwise() {
+        this.waitFor(AltStore, DispatcherStore);
+
+        var _AltStore$getState = AltStore.getState();
+
+        var logDispatches = _AltStore$getState.logDispatches;
+
+        if (!logDispatches) {
+          return;
+        }this.updateSearch(this.searchValue);
       }
     },
     updateSearch: {
@@ -31498,36 +31561,34 @@ module.exports = alt.createStore(DispatcherSearchStore);
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 
+var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
 var AltStore = _interopRequire(require("./AltStore"));
 
 var alt = _interopRequire(require("../flux/alt"));
 
-// XXX this can be a simpler store, we really just want to reduce on every action and make sure
-// the dispatches match.
-//
-// XXX maybe some microflux would help here...
+var DispatcherStore = (function () {
+  //  static displayName = 'DispatcherStore'
 
-var DispatcherStore =
-//  static displayName = 'DispatcherStore'
+  function DispatcherStore() {
+    _classCallCheck(this, DispatcherStore);
 
-function DispatcherStore() {
-  var _this = this;
+    this.dispatches = [];
+  }
 
-  _classCallCheck(this, DispatcherStore);
-
-  this.dispatches = [];
-
-  this.alt.dispatcher.register(function () {
-    _this.waitFor(AltStore);
-
-    _this.dispatches = AltStore.getDispatches();
-
-    // XXX I could shallow equals here to make sure things changed before emitting...
-    _this.emitChange();
+  _createClass(DispatcherStore, {
+    reduce: {
+      value: function reduce() {
+        this.waitFor(AltStore);
+        return { dispatches: AltStore.getDispatches() };
+      }
+    }
   });
-};
+
+  return DispatcherStore;
+})();
 
 module.exports = alt.createStore(DispatcherStore);
 
@@ -31546,32 +31607,14 @@ var alt = _interopRequire(require("../flux/alt"));
 
 var AltStore = _interopRequire(require("../stores/AltStore"));
 
-// XXX ideally I'd have two reducers:
-// one for selectedStore
-// and one for the stores
-//
-// and then something that combines both of those.
-// we actually only need 2 stores, selectedStore, and combo of that + AltStore.getStores.
-// alt needs reducers. Imma try this with microflux.
-//
-// one intermediate solution is to have a this.on('dispatch') lifecycle which auto triggers a change event?
-// or something that allows you to listen to all and auto triggers change events.
-
 var StoresStore = (function () {
   //  static displayName = 'StoresStore'
 
   function StoresStore() {
-    var _this = this;
-
     _classCallCheck(this, StoresStore);
 
     this.selectedStore = null;
     this.stores = [];
-
-    this.dispatcher.register(function () {
-      _this.stores = AltStore.getStores();
-      _this.emitChange();
-    });
 
     this.bindListeners({
       clearAll: DevActions.clearAll,
@@ -31593,6 +31636,11 @@ var StoresStore = (function () {
     selectStore: {
       value: function selectStore(id) {
         this.selectedStore = id;
+      }
+    },
+    otherwise: {
+      value: function otherwise() {
+        this.stores = AltStore.getStores();
       }
     }
   });

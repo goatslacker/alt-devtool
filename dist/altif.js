@@ -275,7 +275,6 @@ function registerAlt() {
     var alt = obj.alt;
 
     // create our state container for each store
-    // XXX DRY THIS
     var stores = Object.keys(alt.stores).reduce(function (obj, storeName) {
       var store = alt.stores[storeName];
       obj[storeName] = getStoreData(store, store.getState());

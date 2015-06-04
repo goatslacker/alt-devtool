@@ -13,19 +13,6 @@ class DispatcherSearchStore {
     this.searchValue = ''
     this.selectedPayload = {}
 
-    this.alt.dispatcher.register(() => {
-      this.waitFor(AltStore, DispatcherStore)
-
-      const { logDispatches } = AltStore.getState()
-      if (!logDispatches) return
-
-      this.updateSearch(this.searchValue)
-
-      // XXX ugh manually emitting a change sucks.
-      // I need a way to listen to all actions and auto emit change.
-      this.emitChange()
-    })
-
     this.bindListeners({
       clearAll: [DevActions.clearAll, DevActions.clearDispatches],
       revert: DevActions.revert,
@@ -53,6 +40,15 @@ class DispatcherSearchStore {
       action: payload.action,
       data: payload.data
     }
+  }
+
+  otherwise() {
+    this.waitFor(AltStore, DispatcherStore)
+
+    const { logDispatches } = AltStore.getState()
+    if (!logDispatches) return
+
+    this.updateSearch(this.searchValue)
   }
 
   updateSearch(searchValue) {
