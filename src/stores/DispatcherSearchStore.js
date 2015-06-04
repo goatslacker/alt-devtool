@@ -37,8 +37,11 @@ class DispatcherSearchStore {
 
   select(payload) {
     this.selectedPayload = {
-      action: payload.action,
-      data: payload.data
+      id: payload.id,
+      root: {
+        action: payload.action,
+        data: payload.data
+      }
     }
   }
 
@@ -67,7 +70,7 @@ class DispatcherSearchStore {
     })
 
     const selectedPayload = filteredDispatches.reduce((obj, dispatch) => {
-      return dispatch.data === this.selectedPayload.data ? dispatch : obj
+      return dispatch.id === this.selectedPayload.id ? dispatch : obj
     }, {})
 
     this.setState({

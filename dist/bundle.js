@@ -30869,7 +30869,7 @@ var DispatcherView = (function (_React$Component) {
     },
     highlightColumn: {
       value: function highlightColumn(node, obj) {
-        return obj.data === this.props.selectedPayload.data ? React.createElement(
+        return obj.id === this.props.selectedPayload.id ? React.createElement(
           "div",
           { style: { background: "#70bde6" } },
           node
@@ -30968,7 +30968,7 @@ var DispatcherView = (function (_React$Component) {
               React.createElement(
                 FauxTable,
                 { title: "Payload", height: this.state.height },
-                React.createElement(Data, { data: this.props.selectedPayload })
+                React.createElement(Data, { data: this.props.selectedPayload.root || {} })
               )
             )
           )
@@ -31500,8 +31500,11 @@ var DispatcherSearchStore = (function () {
     select: {
       value: function select(payload) {
         this.selectedPayload = {
-          action: payload.action,
-          data: payload.data
+          id: payload.id,
+          root: {
+            action: payload.action,
+            data: payload.data
+          }
         };
       }
     },
@@ -31539,7 +31542,7 @@ var DispatcherSearchStore = (function () {
         });
 
         var selectedPayload = filteredDispatches.reduce(function (obj, dispatch) {
-          return dispatch.data === _this.selectedPayload.data ? dispatch : obj;
+          return dispatch.id === _this.selectedPayload.id ? dispatch : obj;
         }, {});
 
         this.setState({

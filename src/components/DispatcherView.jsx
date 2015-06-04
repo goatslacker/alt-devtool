@@ -64,7 +64,7 @@ class DispatcherView extends React.Component {
   }
 
   highlightColumn(node, obj) {
-    return obj.data === this.props.selectedPayload.data
+    return obj.id === this.props.selectedPayload.id
       ? <div style={{ background: '#70bde6' }}>{node}</div>
       : node
   }
@@ -138,7 +138,7 @@ class DispatcherView extends React.Component {
           </div>
           <div className="col c6">
             <FauxTable title="Payload" height={this.state.height}>
-              <Data data={this.props.selectedPayload} />
+              <Data data={this.props.selectedPayload.root || {}} />
             </FauxTable>
           </div>
         </div>
