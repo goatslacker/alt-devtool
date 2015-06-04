@@ -119,7 +119,7 @@ module.exports = getStoreData;
 function getStoreData(store, state) {
   return {
     name: store.displayName,
-    state: state,
+    state: JSON.stringify(state),
     dispatchId: store.dispatchToken,
     listeners: store.boundListeners
   };
@@ -285,8 +285,12 @@ function registerAlt() {
     var storeListeners = Object.keys(alt.stores).map(function (storeName) {
       var store = alt.stores[storeName];
 
+      function mapState(state) {
+        return store.config.onSerialize ? store.config.onSerialize(state) : state;
+      }
+
       return store.listen(function (nextState) {
-        stores[storeName] = getStoreData(store, nextState);
+        stores[storeName] = getStoreData(store, mapState(nextState));
       });
     });
 

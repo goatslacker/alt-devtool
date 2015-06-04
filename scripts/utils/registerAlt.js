@@ -96,8 +96,14 @@ function registerAlt() {
     const storeListeners = Object.keys(alt.stores).map((storeName) => {
       const store = alt.stores[storeName]
 
+      function mapState(state) {
+        return store.config.onSerialize
+          ? store.config.onSerialize(state)
+          : state
+      }
+
       return store.listen((nextState) => {
-        stores[storeName] = getStoreData(store, nextState)
+        stores[storeName] = getStoreData(store, mapState(nextState))
       })
     })
 
