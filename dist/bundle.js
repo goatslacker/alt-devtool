@@ -31175,6 +31175,7 @@ var StoresView = (function (_React$Component) {
     },
     getStoreState: {
       value: function getStoreState() {
+        // XXX make sure this works with other serialized formats
         return this.props.selectedStore === null ? {} : JSON.parse(this.props.stores[this.props.selectedStore].state);
       }
     },

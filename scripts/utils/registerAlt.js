@@ -86,9 +86,9 @@ function registerAlt() {
     const alt = obj.alt
 
     // create our state container for each store
-    const stores = Object.keys(alt.stores).reduce((obj, storeName) => {
-      const store = alt.stores[storeName]
-      obj[storeName] = getStoreData(store, store.getState())
+    const altStores = alt.deserialize(alt.takeSnapshot())
+    const stores = Object.keys(altStores).reduce((obj, storeName) => {
+      obj[storeName] = getStoreData(alt.stores[storeName], altStores[storeName])
       return obj
     }, {})
 

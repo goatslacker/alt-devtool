@@ -6,7 +6,7 @@ export default function parseStores() {
     const alt = obj.alt
     const stores = Object.keys(alt.stores).map((storeName) => {
       const store = alt.stores[storeName]
-      return getStoreData(store, store.getState())
+      return getStoreData(store, alt.takeSnapshot(store))
     }, {})
 
     return { alt: i, stores }

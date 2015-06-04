@@ -119,7 +119,7 @@ module.exports = getStoreData;
 function getStoreData(store, state) {
   return {
     name: store.displayName,
-    state: JSON.stringify(state),
+    state: state,
     dispatchId: store.dispatchToken,
     listeners: store.boundListeners
   };
@@ -141,7 +141,7 @@ function parseStores() {
     var alt = obj.alt;
     var stores = Object.keys(alt.stores).map(function (storeName) {
       var store = alt.stores[storeName];
-      return getStoreData(store, store.getState());
+      return getStoreData(store, alt.takeSnapshot(store));
     }, {});
 
     return { alt: i, stores: stores };
@@ -275,9 +275,9 @@ function registerAlt() {
     var alt = obj.alt;
 
     // create our state container for each store
-    var stores = Object.keys(alt.stores).reduce(function (obj, storeName) {
-      var store = alt.stores[storeName];
-      obj[storeName] = getStoreData(store, store.getState());
+    var altStores = alt.deserialize(alt.takeSnapshot());
+    var stores = Object.keys(altStores).reduce(function (obj, storeName) {
+      obj[storeName] = getStoreData(alt.stores[storeName], altStores[storeName]);
       return obj;
     }, {});
 
