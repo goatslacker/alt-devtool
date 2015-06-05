@@ -33,10 +33,15 @@ function onMessageFromHook(event) {
       registerAlt()
     return
     case 'SNAPSHOT':
-      console.log(alts.get().takeSnapshot())
+      let snapshot = alts.get().takeSnapshot()
+      prompt("Look! Here's your entire app state in a string:", snapshot) 
+      console.log("App snapshot", JSON.parse(snapshot))
     return
     case 'FLUSH':
-      console.log(alts.get().flush())
+      let snapshot = alts.get().flush()
+      prompt("App flushed; App snapshot taken:", snapshot)
+      console.log("App flushed and snapshotted", JSON.parse(snapshot))
+
       parseStores().forEach(data => post('STORES', data))
     return
     case 'RECYCLE_STORE':
