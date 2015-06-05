@@ -9,6 +9,11 @@ const alts = {
     return window['goatslacker.github.io/alt/'] || window['alt.js.org']
   },
 
+  map(f) {
+    const all = alts.all()
+    return (Array.isArray(all) ? all : [{ alt: all, name: 'Alt' }]).map(f)
+  },
+
   get() {
     const all = alts.all()
     if (all) {

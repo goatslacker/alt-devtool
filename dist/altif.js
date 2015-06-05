@@ -72,6 +72,11 @@ var alts = {
     return window["goatslacker.github.io/alt/"] || window["alt.js.org"];
   },
 
+  map: function map(f) {
+    var all = alts.all();
+    return (Array.isArray(all) ? all : [{ alt: all, name: "Alt" }]).map(f);
+  },
+
   get: function get() {
     var all = alts.all();
     if (all) {
@@ -137,7 +142,7 @@ var alts = _interopRequire(require("./alts"));
 var getStoreData = _interopRequire(require("./getStoreData"));
 
 function parseStores() {
-  return alts.all().map(function (obj, i) {
+  return alts.map(function (obj, i) {
     var alt = obj.alt;
     var stores = Object.keys(alt.stores).map(function (storeName) {
       var store = alt.stores[storeName];
@@ -201,7 +206,7 @@ function onMessageFromHook(event) {
     case "SELECT_ALT":
       alts["switch"](data.id);
       post("ALT", {
-        alts: alts.all().map(function (x) {
+        alts: alts.map(function (x) {
           return x.name;
         })
       });
@@ -262,7 +267,7 @@ function registerAlt() {
 
   // initial post of alts
   post("ALT", {
-    alts: alts.all().map(function (x) {
+    alts: alts.map(function (x) {
       return x.name;
     })
   });
@@ -271,7 +276,7 @@ function registerAlt() {
     return post("STORES", data);
   });
 
-  listeners = alts.all().map(function (obj, i) {
+  listeners = alts.map(function (obj, i) {
     var alt = obj.alt;
 
     // create our state container for each store

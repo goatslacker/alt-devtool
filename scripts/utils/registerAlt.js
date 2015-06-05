@@ -26,7 +26,7 @@ function onMessageFromHook(event) {
     case 'SELECT_ALT':
       alts.switch(data.id)
       post('ALT', {
-        alts: alts.all().map(x => x.name)
+        alts: alts.map(x => x.name)
       })
     return
     case 'REFRESH':
@@ -77,12 +77,12 @@ function registerAlt() {
 
   // initial post of alts
   post('ALT', {
-    alts: alts.all().map(x => x.name)
+    alts: alts.map(x => x.name)
   })
 
   parseStores().forEach(data => post('STORES', data))
 
-  listeners = alts.all().map((obj, i) => {
+  listeners = alts.map((obj, i) => {
     const alt = obj.alt
 
     // create our state container for each store
