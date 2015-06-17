@@ -127,7 +127,7 @@ function registerAlt() {
         alt: i,
         id: id,
         action: Symbol.keyFor(payload.action),
-        data: payload.data
+        data: JSON.stringify(payload.data)
       })
 
       snapshots[id] = alt.takeSnapshot()
