@@ -215,10 +215,15 @@ function onMessageFromHook(event) {
       registerAlt();
       return;
     case "SNAPSHOT":
-      console.log(alts.get().takeSnapshot());
+      var snapshot = alts.get().takeSnapshot();
+      prompt("Look! Here's your entire app state in a string:", snapshot);
+      console.log("App snapshot", JSON.parse(snapshot));
       return;
     case "FLUSH":
-      console.log(alts.get().flush());
+      var flushed = alts.get().flush();
+      prompt("App flushed; App snapshot taken:", flushed);
+      console.log("App flushed and snapshotted", JSON.parse(flushed));
+
       parseStores().forEach(function (data) {
         return post("STORES", data);
       });
@@ -318,7 +323,7 @@ function registerAlt() {
         alt: i,
         id: id,
         action: Symbol.keyFor(payload.action),
-        data: payload.data
+        data: JSON.stringify(payload.data)
       });
 
       snapshots[id] = alt.takeSnapshot();

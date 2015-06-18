@@ -34,13 +34,13 @@ function onMessageFromHook(event) {
     return
     case 'SNAPSHOT':
       let snapshot = alts.get().takeSnapshot()
-      prompt("Look! Here's your entire app state in a string:", snapshot) 
+      prompt("Look! Here's your entire app state in a string:", snapshot)
       console.log("App snapshot", JSON.parse(snapshot))
     return
     case 'FLUSH':
-      let snapshot = alts.get().flush()
-      prompt("App flushed; App snapshot taken:", snapshot)
-      console.log("App flushed and snapshotted", JSON.parse(snapshot))
+      let flushed = alts.get().flush()
+      prompt("App flushed; App snapshot taken:", flushed)
+      console.log("App flushed and snapshotted", JSON.parse(flushed))
 
       parseStores().forEach(data => post('STORES', data))
     return
