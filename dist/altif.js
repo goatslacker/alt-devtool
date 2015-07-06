@@ -322,7 +322,7 @@ function registerAlt() {
       post("DISPATCH", {
         alt: i,
         id: id,
-        action: Symbol.keyFor(payload.action),
+        action: payload.details.id,
         data: JSON.stringify(payload.data)
       });
 
