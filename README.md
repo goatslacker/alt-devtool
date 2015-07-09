@@ -2,8 +2,7 @@
 
 > A developer tool extension for debugging your Alt flux applications
 
-If you'd like to install this yourself without going through the chrome store
-then visit this link:
+Download the extension here:
 
 https://github.com/goatslacker/alt-devtool/raw/master/dist/alt-dev.crx
 
