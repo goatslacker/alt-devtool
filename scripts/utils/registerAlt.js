@@ -122,12 +122,25 @@ function registerAlt() {
         alt: i,
         stores: Object.keys(stores).map(name => stores[name])
       })
+      
+      let data;
+      
+      try {
+        data = JSON.stringify(payload.data)
+      } catch (e) {
+        console.warn(
+          '[alt-devtool] Could not serialize dispatch data.\n' +
+          'Error message was:', e.message, '\n' +
+          'Dispatched action was:', payload.action, '\n' +
+          'Offending data was:', payload.data
+        )
+      }
 
       post('DISPATCH', {
         alt: i,
         id: id,
         action: payload.details.id,
-        data: JSON.stringify(payload.data)
+        data
       })
 
       snapshots[id] = alt.takeSnapshot()
