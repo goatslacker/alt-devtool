@@ -7,7 +7,7 @@ class AltStore {
     this.dispatches = {}
     this.stores = {}
     this.selectedAlt = null
-    this.logDispatches = true
+    this.logDispatches = false
 
     this.bindListeners({
       addItem: DevActions.addDispatch,
