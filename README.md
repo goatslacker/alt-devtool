@@ -14,12 +14,8 @@ In your alt app you'll need to use [chromeDebug](https://github.com/goatslacker/
 
 ```js
 var Alt = require('alt');
-var chromeDebug = require('alt/utils/chromeDebug');
-
 var alt = new Alt();
-chromeDebug(alt);
-
-module.exports = alt;
+Alt.debug('alt', alt);
 ```
 
 
