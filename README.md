@@ -48,6 +48,18 @@ Viewing stores. Snapshots. Bootstrap. Flush.
 ![Stores](screenshots/2.png)
 
 
+## Building this yourself
+
+* Clone this repo to your computer
+* Download [Chrome Apps & Extensions Developer Tool](https://chrome.google.com/webstore/detail/chrome-apps-extensions-de/ohmmkhmmmpcnpikjeljgnaoabkaalbgc) from the chrome store.
+* Open the Extensions dev tool you just downloaded and click on the `Extensions` tab
+* Click `Load Unpacked` and find the folder where you cloned alt-devtool
+* Open it
+* Click `pack`
+* You'll need to use a private key, you can generate your own or not use one I think
+* You'll finally have a .crx file which you can then install
+
+
 ## License
 
 [MIT](http://josh.mit-license.org)
