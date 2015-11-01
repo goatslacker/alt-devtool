@@ -51,10 +51,12 @@ Viewing stores. Snapshots. Bootstrap. Flush.
 ## Building this yourself
 
 * Clone this repo to your computer
+* You might need to `npm install` and `npm run build`
 * Download [Chrome Apps & Extensions Developer Tool](https://chrome.google.com/webstore/detail/chrome-apps-extensions-de/ohmmkhmmmpcnpikjeljgnaoabkaalbgc) from the chrome store.
 * Open the Extensions dev tool you just downloaded and click on the `Extensions` tab
 * Click `Load Unpacked` and find the folder where you cloned alt-devtool
 * Open it
+* Remove `node_modules` folder from your directory (you technically don't have to but this is faster)
 * Click `pack`
 * You'll need to use a private key, you can generate your own or not use one I think
 * You'll finally have a .crx file which you can then install
