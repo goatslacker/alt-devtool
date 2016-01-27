@@ -4,13 +4,11 @@
 
 Download the extension here:
 
-https://github.com/goatslacker/alt-devtool/raw/master/dist/alt-dev.crx
+https://chrome.google.com/webstore/detail/alt-devtools/jfjefoacbhfenehankalijibcccajchg
 
 ## Installing
 
 Open up Chrome extensions. Drag the extension onto there. Accept the ridiculous permissions.
-
-In your alt app you'll need to use [chromeDebug](https://github.com/goatslacker/alt/blob/master/src/utils/chromeDebug.js)
 
 ```js
 var Alt = require('alt');
